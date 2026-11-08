@@ -96,6 +96,14 @@ p{margin:.6em 0}
 @media(max-width:900px){.cards{grid-template-columns:1fr}:root{--gutter:20px}body{overflow:auto}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
+
+/* CYBERVERSE responsive patch (additive, phone only; does not alter effects) */
+@media(max-width:600px){
+html,body{overflow-x:clip}
+.g2b>*,.cards>*,.grid2>*,.hero>*{min-width:0}
+#nmap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+button,.btn,.chip{min-height:44px}
+}
 </style>
 </head>
 <body>
