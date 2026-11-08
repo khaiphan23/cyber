@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cyber Escape: The Last Firewall – Level 05</title>
+<style>
+/* Cyber Escape – giao diện tối giản theo phong cách file mẫu (nền đen, viền mảnh, nút dạng viên thuốc, màu nhấn teal) */
+:root{--ground:#050505;--panel:#0e0e0e;--hair:#222;--hair2:#303030;--bright:#f2f2f2;--read:#a6a9ad;--meta:#8a8d91;--live:#3fd6c6;--ink:#0a0a0a;--warn:#d9b45a;--danger:#e5736a;
+--face:"Inter","Noto Sans","Open Sans",Roboto,"Segoe UI",Arial,sans-serif;--mono:"IBM Plex Mono",Consolas,Menlo,monospace;
+--gutter:48px;--gap:24px;--max:1360px;--r:6px;--pill:999px;--dur:180ms;--ease:cubic-bezier(.22,.61,.36,1)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--ground) radial-gradient(ellipse 70% 38% at 50% -6%,rgba(255,255,255,.16),transparent 70%) no-repeat fixed;color:var(--bright);font:17px/1.6 var(--face);overflow:hidden}
+h1,h2,h3{margin:.3em 0;font-weight:400;line-height:1.25}
+p{margin:.6em 0}
+@keyframes rise{from{opacity:0;transform:translateY(12px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:14px;padding:24px max(var(--gutter),calc((100% - var(--max))/2));overflow:auto}
+.screen.active{display:flex}
+.screen.active>*{animation:rise .5s var(--ease) both}
+.screen.active>*:nth-child(2){animation-delay:.07s}.screen.active>*:nth-child(3){animation-delay:.14s}.screen.active>*:nth-child(n+4){animation-delay:.2s}
+#intro,#story,#end{max-width:none;padding-top:10vh}
+#intro>*,#story>*,#end>*{max-width:900px}
+.eyebrow,.small,.dim,.tagline{color:var(--read);font-size:16px}
+.eyebrow{font-family:var(--mono);letter-spacing:.2em;font-size:14px}
+.title{font-size:clamp(34px,5vw,48px);margin:.1em 0;color:var(--bright)}
+.tagline{font-style:normal;color:var(--bright)}
+.small{font-size:14px;color:var(--meta)}
+/* nút */
+.btn{font:inherit;font-size:16px;cursor:pointer;background:transparent;color:var(--bright);border:1px solid var(--hair2);border-radius:var(--pill);padding:9px 20px;transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),color var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.btn:hover{border-color:var(--bright);transform:translateY(-1px)}.btn:active{transform:scale(.98)}
+.btn.big,.btn.g,.m-btns .btn:first-child{background:var(--bright);color:var(--ink);border-color:var(--bright)}
+.btn.big:hover,.btn.g:hover,.m-btns .btn:first-child:hover{background:#fff}
+.btn.big{font-size:17px;padding:11px 28px}
+.btn.alt{color:var(--read)}.btn.alt:hover{color:var(--bright)}
+.m-btns .btn.alt:first-child{background:var(--bright);color:var(--ink)}
+.small-btn{padding:3px 14px;font-size:13px}
+.btn:focus-visible,.opt:focus-visible,.hot:focus-visible,input:focus-visible{outline:2px solid var(--bright);outline-offset:3px}
+.icon-btn{position:fixed;top:12px;right:14px;z-index:65;background:var(--panel);border:1px solid var(--hair2);color:var(--bright);width:34px;height:34px;border-radius:var(--pill);cursor:pointer}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.term{width:100%;white-space:pre-wrap;font:15px/1.8 var(--mono);color:var(--read);background:var(--panel);border:1px solid var(--hair);border-radius:var(--r);padding:20px;min-height:260px;margin:0}
+/* HUD */
+#game{padding-top:20px}
+.hud{width:100%;display:flex;gap:14px 20px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--panel);border:1px solid var(--hair);border-radius:var(--r);padding:14px 20px;font-size:14px;color:var(--read);margin-right:0}
+.hud b{color:var(--bright);font-weight:400}
+.hud-r{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.progress{width:200px;height:4px;background:var(--hair);border-radius:var(--pill);overflow:hidden;margin-top:6px}
+#bar{height:100%;width:0;background:var(--bright);transition:width .6s var(--ease)}
+.key{display:inline-block;border:1px solid var(--hair2);color:var(--meta);padding:0 9px;border-radius:var(--pill);margin-left:4px;font-size:13px}
+.key.on{color:var(--live);border-color:var(--live)}
+#timer.over{color:var(--danger)}
+#stage{width:100%;flex:1}
+.prompt{border-left:2px solid var(--hair2);padding:4px 16px;margin-bottom:var(--gap);color:var(--read)}
+.prompt b{color:var(--bright);font-weight:400}
+.panel{background:var(--panel);border:1px solid var(--hair);border-radius:var(--r);padding:20px;margin-top:var(--gap)}
+.panel h3{margin:0 0 10px;font-size:20px}
+/* Level 1 */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
+.card{background:var(--panel);border:1px solid var(--hair);border-radius:var(--r);padding:20px;display:grid;grid-template-columns:88px 1fr;gap:4px 16px;align-items:center;transition:border-color var(--dur) var(--ease)}
+.card:hover{border-color:var(--hair2)}
+.card.flag{border-color:var(--danger)}
+.card h3{margin:0;font-size:20px}
+.tag{grid-column:1/3;color:var(--meta);font:13px var(--mono);letter-spacing:.1em}
+.av{width:84px;height:84px;grid-row:span 2;margin-top:8px;border-radius:50%;box-shadow:0 0 0 3px #1c1c1c,0 0 0 4px var(--hair2)}
+.user{color:var(--read);font:14px var(--mono)}
+.bio{grid-column:1/3;color:var(--read);margin:8px 0}
+.card dl{grid-column:1/3;display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:15px;border-top:1px solid var(--hair);padding-top:10px;margin:0}
+.card dt{color:var(--meta)}.card dd{margin:0}
+.card .pick{grid-column:1/3;margin-top:10px}
+.checks{display:grid;gap:8px;margin-bottom:14px}
+.checks label{display:flex;gap:12px;align-items:center;padding:10px 14px;border:1px solid var(--hair2);border-radius:var(--r);cursor:pointer;color:var(--read);transition:border-color var(--dur) var(--ease),color var(--dur) var(--ease)}
+.checks label:hover{border-color:var(--bright);color:var(--bright)}
+.checks input{accent-color:var(--bright);width:18px;height:18px}
+/* Level 2 */
+.mail-wrap{display:grid;grid-template-columns:2fr 1fr;gap:var(--gap);align-items:start}
+.mail{background:var(--panel);border:1px solid var(--hair);border-radius:var(--r);overflow:hidden}
+.mail-bar{background:var(--ground);border-bottom:1px solid var(--hair);padding:8px 16px;color:var(--meta);font:12px var(--mono);display:flex;gap:6px;align-items:center;letter-spacing:.08em}
+.mail-bar i{width:9px;height:9px;border-radius:50%;background:var(--hair2)}
+.mail-head{padding:14px 20px;border-bottom:1px solid var(--hair);display:grid;gap:4px;color:var(--read)}
+.mail-body{padding:20px;display:grid;gap:12px;color:var(--read)}
+.hot{cursor:pointer;border-bottom:1px dashed var(--warn);color:var(--bright);transition:background var(--dur)}
+.hot:hover{background:rgba(217,180,90,.18)}
+.hot.found{background:rgba(229,115,106,.18);border-bottom:1px solid var(--danger)}
+.btn-fake{display:inline-block;background:var(--hair2);padding:8px 22px;border-radius:var(--pill);border-bottom:none}
+.btn-fake.found{background:rgba(229,115,106,.3)}
+.info{min-height:90px;color:var(--read);font-size:15px}.info b{color:var(--bright);font-weight:400}
+.chip{display:inline-block;margin:6px 6px 0 0;padding:2px 10px;border:1px solid var(--hair2);border-radius:var(--r);color:var(--danger);font:12px var(--mono)}
+.opt{display:block;width:100%;text-align:left;margin-top:8px;padding:12px 16px;background:transparent;color:var(--read);border:1px solid var(--hair2);border-radius:var(--r);cursor:pointer;font:inherit;font-size:16px;transition:border-color var(--dur) var(--ease),color var(--dur) var(--ease)}
+.opt:hover{border-color:var(--bright);color:var(--bright)}
+.opt b{font-weight:400;color:var(--bright)}
+/* Modal */
+#overlay{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(5,5,5,.72) radial-gradient(ellipse 60% 40% at 50% 0,rgba(255,255,255,.14),transparent 70%);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);padding:16px;overflow:auto}
+#overlay.open{display:flex;animation:fade .3s var(--ease)}
+.modal{width:min(620px,100%);background:var(--panel);border:1px solid var(--hair2);border-radius:var(--r);padding:28px;text-align:left}
+.m-title{font-size:clamp(26px,4vw,38px);font-weight:400;color:var(--bright);line-height:1.2}
+.m-sub{color:var(--read);margin:6px 0 4px;font:14px var(--mono);letter-spacing:.04em}
+.modal.ok{border-color:var(--live)}.modal.ok .m-title{color:var(--live)}
+.modal.danger{border-color:var(--danger)}.modal.danger .m-title{color:var(--danger)}
+.modal.warn{border-color:var(--warn)}.modal.warn .m-title{color:var(--warn)}
+.m-body{color:var(--read);margin:14px 0 18px;font-size:16px}
+.m-body b{color:var(--bright);font-weight:400}
+.m-body ul{padding-left:20px;display:grid;gap:6px;margin:8px 0}
+.m-btns{display:flex;gap:12px;flex-wrap:wrap}
+#toast{position:fixed;right:20px;top:20px;background:var(--bright);color:var(--ink);padding:8px 16px;border-radius:var(--pill);font:13px var(--mono);z-index:80;opacity:0;transform:translateY(-8px);transition:.3s var(--ease);pointer-events:none}
+#toast.show{opacity:1;transform:none}
+/* Kết thúc */
+.status{font:14px var(--mono);letter-spacing:.12em;color:var(--live)}
+#end p{font-size:20px;color:var(--bright)}#end p.dim{font-size:17px;color:var(--read)}
+.stats{display:grid;gap:12px;background:var(--panel);border:1px solid var(--hair);border-radius:var(--r);padding:20px;min-width:min(460px,100%);color:var(--read)}
+.stats b{color:var(--bright);font-weight:400}
+.stats .rank{font-size:26px;color:var(--live);font-family:var(--face)}
+/* Level 5 – trạng thái chọn/đã ghép (dùng lại biến màu hiện có) */
+.opt.sel{border-color:var(--bright);color:var(--bright)}
+.opt.done{border-color:var(--live);color:var(--live);cursor:default}
+.sevrow{grid-column:1/3;display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.stats .ph{display:flex;justify-content:space-between;gap:16px}
+@media(max-width:900px){.cards,.mail-wrap{grid-template-columns:1fr}:root{--gutter:20px}body{overflow:auto}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+</style>
+</head>
+<body>
+<button id="muteBtn" class="icon-btn" title="Bật/tắt âm thanh">🔊</button>
+
+<!-- INTRO -->
+<section id="intro" class="screen active">
+  <div class="eyebrow">LEVEL 05 · FINAL FIREWALL: SYSTEM OVERRIDE</div>
+  <h1 class="glitch title" data-text="THE LAST FIREWALL">THE LAST FIREWALL</h1>
+  <p class="tagline">"Every layer has fallen. Only verification remains."</p>
+  <button id="initBtn" class="btn big">INITIALIZE SYSTEM</button>
+  <button id="contBtn" class="btn alt" hidden>CONTINUE</button>
+  <p class="small">Mô phỏng giáo dục. Game không yêu cầu nhập mật khẩu hay thông tin cá nhân. Tài khoản, email, thiết bị và dữ liệu trong game đều là giả lập.</p>
+</section>
+
+<!-- BOOT + STORY -->
+<section id="story" class="screen">
+  <pre id="storyText" class="term"></pre>
+  <button id="storyGo" class="btn big" style="display:none">ENTER FINAL FIREWALL</button>
+  <p class="small">Nhấn vào màn hình để bỏ qua hiệu ứng gõ chữ</p>
+</section>
+
+<!-- GAME -->
+<section id="game" class="screen">
+  <header class="hud">
+    <div class="hud-l"><b id="lvl">LEVEL 05</b><div class="progress"><div id="bar"></div></div></div>
+    <div class="hud-m">KEYS <span id="keys"></span></div>
+    <div class="hud-r">
+      <span>XP <b id="xp">0 XP</b></span>
+      <span>BONUS <b id="pot">500</b></span>
+      <span>TIME <b id="timer">--:--</b></span>
+      <button id="hintBtn" class="btn small-btn alt">HINT (-25)</button>
+    </div>
+  </header>
+  <main id="stage"></main>
+</section>
+
+<!-- END -->
+<section id="end" class="screen">
+  <div class="status">[ SYSTEM RESTORATION COMPLETE ]</div>
+  <h2 class="title" style="font-size:clamp(28px,4vw,40px)">THE LAST FIREWALL</h2>
+  <p>"Congratulations, Agent."</p>
+  <p class="dim">"You have successfully restored the CYBERVERSE security system."</p>
+  <div id="endStats" class="stats"></div>
+  <div class="row">
+    <button id="replayBtn" class="btn g">REPLAY LEVEL 05</button>
+  </div>
+</section>
+
+<div id="overlay"></div>
+<div id="toast"></div>
+<script>
+'use strict';
+/* CYBER ESCAPE: THE LAST FIREWALL – script.js
+   Level 1 độc lập. Thêm màn mới: push một object vào mảng LEVELS (xem mục "LEVELS" bên dưới). */
+
+/* ===== Helpers & cấu hình ===== */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const SAVE_KEY='cyberEscape.lv5.save.v1', HINT_COST=25, WRONG_COST=40, OVER_MULT=.8, MIN_RATIO=.2;
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+
+/* ===== Lưu tiến trình (LocalStorage) ===== */
+const fresh=()=>({level:0,scores:[],keys:[],time:0,hints:0,wrongs:0,done:false,muted:false});
+let S=(()=>{try{return {...fresh(),...JSON.parse(localStorage.getItem(SAVE_KEY))}}catch(e){return fresh()}})();
+const save=()=>{try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}};
+const totalXP=()=>S.scores.reduce((a,b)=>a+(b||0),0);
+
+/* ===== Âm thanh (WebAudio, không cần file ngoài) ===== */
+let AC;
+function beep(f=440,d=.12,type='sine',v=.05,delay=0){
+  if(S.muted)return;
+  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+delay;
+    o.type=type;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);
+    o.start(t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.stop(t+d);}catch(e){}
+}
+const sfx={
+  click:()=>beep(660,.06,'square',.03),
+  ok:()=>{beep(523,.12);beep(784,.2,'sine',.05,.12)},
+  bad:()=>beep(160,.3,'sawtooth',.05),
+  key:()=>[523,659,784,1047].forEach((f,i)=>beep(f,.16,'triangle',.05,i*.1))
+};
+
+/* ===== UI chung ===== */
+function show(id){$$('.screen').forEach(s=>s.classList.remove('active'));$('#'+id).classList.add('active')}
+function modal({cls='',title,sub='',html='',buttons=[]}){
+  const o=$('#overlay');
+  o.innerHTML=`<div class="modal ${cls}"><div class="m-title">${title}</div>${sub?`<div class="m-sub">${sub}</div>`:''}<div class="m-body">${html}</div><div class="m-btns"></div></div>`;
+  buttons.forEach(b=>{const e=document.createElement('button');e.className='btn '+(b.cls||'');e.textContent=b.label;
+    e.onclick=()=>{sfx.click();closeModal();b.fn&&b.fn()};$('.m-btns',o).appendChild(e)});
+  o.classList.add('open');
+}
+const closeModal=()=>$('#overlay').classList.remove('open');
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+
+/* ===== Màn mở đầu & cốt truyện ===== */
+const BOOT=['> BOOTING CYBERVERSE DEFENSE KERNEL ........ [OK]','> LOADING SECURITY MODULES ................. [OK]','> CONNECTING TO LAST FIREWALL .............. [CRITICAL]',''];
+const STORY=['[ CRITICAL SYSTEM ALERT ]','"THE LAST FIREWALL IS COLLAPSING."','"All security layers require final verification."','"Agent, this is your final mission."','','Bạn đã thu thập các Security Keys, nhưng hệ thống CYBERVERSE vẫn chưa được khôi phục hoàn toàn.','Hãy chẩn đoán sự cố, xử lý tài khoản bị xâm nhập, phục hồi dữ liệu và hoàn tất lớp phòng thủ cuối cùng.'];
+let skip=false;
+async function typeLines(el,lines){
+  skip=false;el.textContent='';
+  for(const l of lines){
+    for(const ch of l){if(skip){el.textContent=lines.join('\n');return}el.textContent+=ch;await sleep(12)}
+    el.textContent+='\n';await sleep(150);
+  }
+}
+async function boot(){
+  S={...fresh(),muted:S.muted};save();
+  show('story');const b=$('#storyGo');b.style.display='none';
+  await typeLines($('#storyText'),[...BOOT,...STORY]);
+  b.style.display='';
+}
+
+/* ===== Vòng đời một màn chơi ===== */
+let L=null,tick=null;
+const calcScore=()=>{const mx=L.lv.max;let s=Math.max(Math.round(mx*MIN_RATIO),mx-L.wrong*WRONG_COST-L.hints*HINT_COST);return L.over?Math.round(s*OVER_MULT):s};
+function hud(){
+  const i=L?L.i:S.level;
+  $('#lvl').textContent='LEVEL 05 · PHASE '+Math.min(i+1,LEVELS.length);
+  const frac=L?(L.done?1:L.p/L.n):0;
+  $('#bar').style.width=(L?(L.i+frac)/LEVELS.length*100:S.level/LEVELS.length*100)+'%';
+  $('#keys').innerHTML=LEVELS.map((l,k)=>`<span class="key ${S.keys[k]?'on':''}" title="${l.key}">⚿</span>`).join('');
+  $('#xp').textContent=totalXP()+' XP';
+  if(L)$('#pot').textContent=calcScore();
+}
+function drawTimer(){const t=$('#timer');t.textContent=L.over?'OVERTIME':fmt(L.left);t.classList.toggle('over',L.over)}
+function startTimer(){
+  clearInterval(tick);
+  tick=setInterval(()=>{
+    if(!L||L.done)return;
+    L.elapsed++;
+    if(L.left>0)L.left--; else if(!L.over){L.over=true;toast('OVERTIME: điểm thưởng giảm 20%');hud()}
+    drawTimer();
+  },1000);
+  drawTimer();
+}
+function startLevel(i){
+  clearInterval(tick);
+  if(i>=LEVELS.length){L=null;return endGame()}
+  const lv=LEVELS[i];S.level=i;save();
+  L={i,lv,wrong:0,hints:0,left:lv.time,elapsed:0,over:false,done:false,step:0,p:0,n:1};
+  const st=$('#stage');st.onclick=null;st.innerHTML='';
+  show('game');hud();drawTimer();
+  modal({cls:i===0?'danger':'',title:lv.alertTitle,sub:lv.name,html:lv.alert.map(t=>`<p>${t}</p>`).join(''),buttons:[{label:'START MISSION',fn:()=>{lv.start(st);hud();startTimer()}}]});
+}
+const api={
+  wrong(msg){
+    L.wrong++;S.wrongs=(S.wrongs||0)+1;save();sfx.bad();hud();
+    modal({cls:'danger',title:'SYSTEM WARNING',sub:`-${WRONG_COST} XP bonus · bạn có thể thử lại`,html:msg,
+      buttons:[{label:'RETRY'},{label:'USE HINT',cls:'alt',fn:()=>$('#hintBtn').click()}]});
+  },
+  done(title,html){
+    L.done=true;clearInterval(tick);
+    const sc=calcScore(),idx=L.i,lv=L.lv;
+    S.scores[idx]=sc;S.keys[idx]=lv.key;S.time+=L.elapsed;S.level=idx+1;save();hud();sfx.key();
+    modal({cls:'ok',title,sub:`+${sc} XP &nbsp;|&nbsp; 🔑 ${lv.key} ACQUIRED`,html,
+      buttons:[{label:idx+1<LEVELS.length?'NEXT PHASE':'RESTORE FIREWALL',fn:()=>startLevel(idx+1)}]});
+  }
+};
+$('#hintBtn').onclick=()=>{
+  if(!L||L.done)return;
+  L.hints++;S.hints=(S.hints||0)+1;save();hud();sfx.click();
+  modal({cls:'warn',title:'HINT',sub:`-${HINT_COST} XP bonus`,html:`<p>${L.lv.hint(L.step)}</p>`,buttons:[{label:'OK'}]});
+};
+
+/* ===== Màn kết thúc ===== */
+function endGame(){
+  S.done=true;save();
+  const xp=totalXP(),maxXP=LEVELS.reduce((a,l)=>a+l.max,0);
+  const rank=xp>=maxXP*.9?'LEGENDARY CYBER GUARDIAN':xp>=maxXP*.7?'MASTER DEFENDER':xp>=maxXP*.4?'SECURITY SPECIALIST':'ROOKIE AGENT';
+  $('#endStats').innerHTML=`<div>TOTAL XP: <b>${xp} / ${maxXP}</b></div>`+
+   LEVELS.map((l,k)=>`<div class="ph"><span>${l.phase}</span><b>${S.scores[k]||0} / ${l.max} XP</b></div>`).join('')+
+   `<div>COMPLETION TIME: <b>${fmt(S.time)}</b></div><div>HINTS USED: <b>${S.hints||0}</b></div>
+   <div>SECURITY KEYS: ${S.keys.filter(Boolean).map(k=>`🔑 <b>${k}</b>`).join(' &nbsp; ')}</div><div class="rank">TITLE: ${rank}</div>`;
+  show('end');sfx.ok();
+}
+
+/* ===== LEVELS: mỗi Phase của Level 5 là một object độc lập =====
+   {key, phase, name, max(XP tối đa), time(giây), alertTitle, alert[], hint(step), start(stageEl)}
+   Trong start() dùng L (trạng thái màn; L.n = số bước, L.p = số bước đã xong) và api.wrong(msg) / api.done(title, html). */
+const LEVELS=[];
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const hintSeq=a=>a[Math.min(Math.max(L.hints-1,0),a.length-1)];
+
+/* ---- PHASE 1: SYSTEM DIAGNOSIS (200 XP) ---- */
+const SEV=['CRITICAL','HIGH','MEDIUM','LOW'];
+const ALERTS=[
+{id:'login',tag:'ALERT 01 · ACCOUNT',name:'Đăng nhập bất thường',sev:0,
+  t:'Tài khoản nhân viên <b>nv.minh</b> đăng nhập lúc 03:12 từ một quốc gia chưa từng truy cập, sau 14 lần nhập sai mật khẩu. Tài khoản chưa bật MFA.',
+  ok:'Có dấu hiệu tài khoản đã bị chiếm quyền và sự cố đang diễn ra, nên phải xử lý ngay.',
+  under:'<b>Đánh giá quá thấp.</b> Đăng nhập từ nơi lạ sau nhiều lần đoán mật khẩu, lại không có MFA, cho thấy kẻ tấn công có thể đã vào được hệ thống.',
+  hint:'Hỏi bản thân: sự cố đang diễn ra không, và kẻ tấn công đã vào được hệ thống chưa?'},
+{id:'backup',tag:'ALERT 02 · DATA',name:'Dữ liệu chưa được sao lưu',sev:2,
+  t:'Một số dữ liệu của phòng kế toán chưa được sao lưu trong tuần này. Hệ thống vẫn hoạt động bình thường.',
+  ok:'Chưa có sự cố thực sự, nhưng nếu xảy ra lỗi thì dữ liệu sẽ không khôi phục được. Cần lên lịch sao lưu sớm.',
+  under:'<b>Đánh giá quá thấp.</b> Dữ liệu không có bản sao lưu sẽ không thể phục hồi khi gặp sự cố, nên không thể xem nhẹ.',
+  over:'<b>Đánh giá quá cao.</b> Hệ thống vẫn chạy bình thường và chưa có dấu hiệu bị tấn công. Đây là rủi ro cần xử lý theo kế hoạch, chưa phải khẩn cấp.',
+  hint:'Có kẻ tấn công đang hoạt động không, hay đây là một rủi ro sẽ gây hại nếu có sự cố xảy ra sau này?'},
+{id:'mail',tag:'ALERT 03 · EMAIL',name:'Email đáng ngờ gửi hàng loạt',sev:1,
+  t:'Một email giả mạo bộ phận IT, yêu cầu “xác minh mật khẩu”, được gửi tới <b>120 người dùng</b>. Chưa ai báo đã bấm vào liên kết.',
+  ok:'Thư lừa đảo đã tới nhiều người và có thể lan rộng. Cần chặn và cảnh báo nhanh, dù chưa xác nhận ai bị ảnh hưởng.',
+  under:'<b>Đánh giá quá thấp.</b> Một email phishing gửi cho nhiều người có thể làm lộ nhiều tài khoản cùng lúc.',
+  over:'<b>Đánh giá quá cao.</b> Hiện chưa ai bấm vào liên kết và chưa có tài khoản nào bị xác nhận bị chiếm, nên chưa tới mức CRITICAL.',
+  hint:'Phạm vi ảnh hưởng rộng, nhưng đã có ai bị thiệt hại thật chưa?'},
+{id:'device',tag:'ALERT 04 · DEVICE',name:'Thiết bị cần kiểm tra',sev:3,
+  t:'Một máy tính ở phòng lab cần kiểm tra vì lâu chưa cập nhật bản vá. Không có dấu hiệu bất thường và máy không lưu dữ liệu nhạy cảm.',
+  ok:'Không có dấu hiệu bị xâm nhập và không chứa dữ liệu nhạy cảm. Chỉ cần kiểm tra và cập nhật theo lịch.',
+  over:'<b>Đánh giá quá cao.</b> Thiết bị chưa có dấu hiệu bị xâm nhập và không giữ dữ liệu nhạy cảm, nên không cần ưu tiên trước các sự cố đang đe dọa dữ liệu.',
+  hint:'Thiết bị này có dấu hiệu bị tấn công hoặc chứa dữ liệu quan trọng không?'},
+{id:'ransom',tag:'ALERT 05 · SERVER',name:'Phát hiện mã độc tống tiền',sev:0,
+  t:'Máy chủ dữ liệu khách hàng bắt đầu <b>mã hóa tệp hàng loạt</b> và xuất hiện ghi chú đòi tiền chuộc. Mã độc đang lan sang các máy khác trong mạng nội bộ.',
+  ok:'Mã độc đang hoạt động và lan rộng ngay lúc này, đe dọa trực tiếp dữ liệu khách hàng. Phải cô lập máy chủ ngay lập tức.',
+  under:'<b>Đánh giá quá thấp.</b> Ransomware đang mã hóa dữ liệu thật và lan sang các máy khác — đây là sự cố đang diễn ra với hậu quả nghiêm trọng, không thể chờ xử lý theo lịch.',
+  hint:'Mã độc có đang hoạt động và lan rộng ngay lúc này không?'},
+{id:'onboard',tag:'ALERT 06 · ACCESS',name:'Tài khoản thực tập sinh mới chờ cấp quyền',sev:3,
+  t:'Một thực tập sinh mới được tạo tài khoản nhưng <b>chưa được cấp quyền truy cập hệ thống nào</b>. Đây là bước chuẩn bị bình thường trước ngày làm việc đầu tiên.',
+  ok:'Đây là quy trình cấp tài khoản bình thường, chưa có quyền truy cập nào được cấp và không có dấu hiệu bất thường.',
+  over:'<b>Đánh giá quá cao.</b> Tài khoản chưa có quyền truy cập nào và đây chỉ là bước chuẩn bị theo quy trình, không có dấu hiệu rủi ro nào.',
+  hint:'Tài khoản này đã có quyền truy cập hoặc dấu hiệu bất thường nào chưa?'}
+];
+LEVELS.push({
+  key:'SECURITY KEY 05-A',phase:'PHASE 1 · SYSTEM DIAGNOSIS',name:'LEVEL 05 · PHASE 1 · SYSTEM DIAGNOSIS',max:300,time:360,
+  alertTitle:'CRITICAL SYSTEM ALERT',
+  alert:['<b>THE LAST FIREWALL IS COLLAPSING.</b>','All security layers require final verification.','Agent, this is your final mission.','Phase 1: phân loại '+ALERTS.length+' cảnh báo theo mức độ CRITICAL, HIGH, MEDIUM hoặc LOW.'],
+  hint:()=>{const a=ALERTS.find(x=>!L.sol.has(x.id));return a?a.hint:'Hãy xem lại các cảnh báo.'},
+  start(st){
+    L.n=ALERTS.length;L.p=0;L.sol=new Set();
+    st.innerHTML=`<div class="prompt"><b>PHASE 1/4 · SYSTEM DIAGNOSIS</b> · Hệ thống phát ra <b>${ALERTS.length} cảnh báo giả lập</b>. Hãy phân loại từng cảnh báo theo mức độ nghiêm trọng. Hãy cân nhắc sự cố có đang diễn ra không, phạm vi ảnh hưởng và dữ liệu có nhạy cảm không.</div>
+      <div class="cards">${ALERTS.map(a=>`<div class="panel" style="margin-top:0"><div class="tag" style="margin-bottom:6px">${a.tag}</div><h3>${a.name}</h3><div class="bio" style="margin:6px 0">${a.t}</div>
+        <div class="sevrow" id="sev-${a.id}">${SEV.map((s,k)=>`<button class="btn small-btn" data-a="${a.id}" data-s="${k}">${s}</button>`).join('')}</div></div>`).join('')}</div>
+      <div class="panel"><h3>Phân tích</h3><div id="cnt" class="small">Đã phân loại: 0/${ALERTS.length}</div><div id="info" class="info">Chọn mức độ cho từng cảnh báo. Mỗi lựa chọn đều có phản hồi.</div></div>`;
+    st.scrollTop=0;$('#stage').parentElement.scrollTop=0;
+    st.onclick=e=>{
+      const b=e.target.closest('[data-a]');if(!b||L.done)return;
+      const a=ALERTS.find(x=>x.id===b.dataset.a),s=+b.dataset.s;
+      if(L.sol.has(a.id))return;
+      sfx.click();
+      if(s!==a.sev)return api.wrong(s<a.sev?a.over:a.under);
+      L.sol.add(a.id);L.p=L.sol.size;sfx.ok();
+      $('#sev-'+a.id).innerHTML=`<span class="key on">${SEV[a.sev]}</span>`;
+      $('#info').innerHTML=`<b>${a.name} → ${SEV[a.sev]}</b><br>${a.ok}`;
+      $('#cnt').textContent=`Đã phân loại: ${L.sol.size}/${ALERTS.length}`;hud();
+      if(L.sol.size===ALERTS.length)api.done('DIAGNOSIS COMPLETE',
+        `<p>Bạn đã phân loại đúng cả ${ALERTS.length} cảnh báo:</p><ul>${[...ALERTS].sort((x,y)=>x.sev-y.sev).map(x=>`<li><b>${SEV[x.sev]}</b> · ${x.name}: ${x.ok}</li>`).join('')}</ul><p><b>Ghi nhớ:</b> mức độ ưu tiên phụ thuộc vào việc sự cố có đang diễn ra không, phạm vi ảnh hưởng và độ nhạy cảm của dữ liệu.</p>`);
+    };
+  }
+});
+
+/* ---- PHASE 2: THE DECISION (3 tình huống nối tiếp) ---- */
+const SCENARIOS2=[
+{tag:'SCENARIO · ACCOUNT BREACH',bar:'SECURITY LOG · ACCOUNT MONITOR',
+  head:'Tài khoản: nv.minh@cyberverse.corp (giả lập)',status:'SUSPICIOUS ACTIVITY',
+  logs:['03:12 · Đăng nhập thành công từ địa chỉ lạ, quốc gia chưa từng truy cập.','03:14 · Email khôi phục của tài khoản bị thay đổi.','03:15 · Hơn 2.400 tệp được tải xuống chỉ trong vài phút.'],
+  q:'Một tài khoản nhân viên có dấu hiệu bị xâm nhập. Bạn sẽ xử lý thế nào?',
+  hint:'Hãy nghĩ đến quy trình chính thức của tổ chức: ai có trách nhiệm điều tra và khôi phục tài khoản?',
+  opts:[
+   {t:'Bỏ qua cảnh báo vì có thể chỉ là báo động nhầm',why:'Bỏ qua cảnh báo cho kẻ tấn công thêm thời gian giữ quyền truy cập, lấy dữ liệu và đổi thông tin khôi phục. Mỗi phút chờ đợi làm thiệt hại lớn hơn.'},
+   {t:'Chia sẻ mật khẩu tài khoản đó để nhiều người cùng kiểm tra',why:'Chia sẻ mật khẩu làm lộ thông tin đăng nhập cho nhiều người hơn, không thể truy vết ai đã làm gì, và vi phạm nguyên tắc không bao giờ chia sẻ mật khẩu.'},
+   {t:'Báo cáo sự cố, sử dụng quy trình khôi phục chính thức và yêu cầu bộ phận phụ trách kiểm tra',ok:1},
+   {t:'Xóa toàn bộ dữ liệu ngay lập tức',why:'Xóa dữ liệu làm mất bằng chứng điều tra và cả dữ liệu hợp pháp, trong khi tài khoản vẫn có thể đang bị kẻ tấn công điều khiển.'}
+  ],
+  summary:'Phương án đúng là <b>báo cáo sự cố và dùng quy trình khôi phục chính thức</b>. Khi nghi ngờ tài khoản bị xâm nhập, hãy báo cáo ngay, không tự xử lý một mình và không chia sẻ mật khẩu.'},
+{tag:'SCENARIO · PHISHING EMAIL',bar:'INBOX · MAIL SECURITY SCAN',
+  head:'Từ: "IT Support" <it-support@cyberversee-corp.com> (giả lập)',status:'SUSPECTED PHISHING',
+  logs:['Tiêu đề: "Tài khoản của bạn sẽ bị khóa trong 24 giờ".','Yêu cầu bấm vào liên kết lạ để "xác minh mật khẩu" ngay lập tức.','Tên miền người gửi viết sai chính tả: cyberversee-corp.com (thừa một chữ "e").'],
+  q:'Bạn nhận được email này. Bạn sẽ làm gì?',
+  hint:'So sánh kỹ tên miền người gửi với tên miền thật, và nhớ: không ai hợp lệ ép bạn bấm liên kết ngay lập tức.',
+  opts:[
+   {t:'Bấm vào liên kết ngay để kiểm tra xem có đúng không',why:'Bấm vào liên kết nghi ngờ có thể dẫn tới trang giả mạo để lấy cắp mật khẩu hoặc cài mã độc vào máy.'},
+   {t:'Không bấm liên kết, báo cáo email cho bộ phận an ninh/IT rồi xóa',ok:1},
+   {t:'Trả lời email để hỏi người gửi xem có phải thật không',why:'Trả lời cho kẻ lừa đảo chỉ xác nhận địa chỉ email của bạn đang hoạt động, khiến bạn dễ bị nhắm tới nhiều hơn.'},
+   {t:'Chuyển tiếp email cho đồng nghiệp để họ tự kiểm tra giúp',why:'Chuyển tiếp email phishing có thể lan rủi ro sang người khác thay vì ngăn chặn nó tại nguồn.'}
+  ],
+  summary:'Phương án đúng là <b>không bấm liên kết, báo cáo cho bộ phận an ninh/IT rồi xóa</b>. Luôn kiểm tra kỹ tên miền người gửi và xác minh qua kênh chính thức trước khi tin bất kỳ yêu cầu khẩn cấp nào.'},
+{tag:'SCENARIO · SOCIAL ENGINEERING',bar:'CALL LOG · UNVERIFIED CALLER',
+  head:'Cuộc gọi đến: "Bộ phận kỹ thuật tổng đài" (giả lập)',status:'UNVERIFIED CALLER',
+  logs:['Người gọi xưng là kỹ thuật viên nội bộ, yêu cầu đọc mã OTP vừa gửi để "khắc phục sự cố hệ thống".','Người gọi tạo áp lực thời gian: "cần xử lý ngay trong vài phút, nếu không tài khoản sẽ bị khóa".','Số điện thoại gọi đến không có trong danh bạ nội bộ của công ty.'],
+  q:'Bạn sẽ phản ứng thế nào với cuộc gọi này?',
+  hint:'Không nhân viên hợp lệ nào cần bạn đọc mã OTP qua điện thoại. Hãy nghĩ cách xác minh danh tính người gọi qua kênh khác.',
+  opts:[
+   {t:'Đọc mã OTP vì người gọi có vẻ biết rõ về hệ thống',why:'Không nhân viên hợp lệ nào cần bạn đọc mã OTP qua điện thoại; đây là dấu hiệu lừa đảo nhằm chiếm quyền tài khoản.'},
+   {t:'Từ chối cung cấp mã, cúp máy và xác minh lại qua kênh nội bộ chính thức',ok:1},
+   {t:'Đọc một phần mã để tỏ thiện chí hợp tác',why:'Chỉ cần một phần hoặc toàn bộ mã OTP bị lộ cũng có thể đủ để kẻ tấn công chiếm quyền tài khoản.'},
+   {t:'Im lặng cúp máy mà không báo cáo gì cả',why:'Không báo cáo khiến đội an ninh không biết để cảnh báo người khác, và kẻ gian có thể tiếp tục gọi cho đồng nghiệp khác.'}
+  ],
+  summary:'Phương án đúng là <b>từ chối cung cấp mã, cúp máy và xác minh lại qua kênh nội bộ chính thức</b>. Mã OTP không bao giờ nên được đọc cho người khác, kể cả người tự xưng là nhân viên kỹ thuật.'},
+{tag:'SCENARIO · USB DROP',bar:'DEVICE LOG · UNKNOWN MEDIA',
+  head:'Vị trí: bãi đỗ xe công ty (giả lập)',status:'UNVERIFIED DEVICE',
+  logs:['Một USB không rõ nguồn gốc được tìm thấy ở bãi đỗ xe, có dán nhãn "LƯƠNG THƯỞNG Q4 - MẬT".','Không có thông tin chủ sở hữu hoặc tem kiểm định của công ty trên thiết bị.','Đây là thủ đoạn phổ biến để phát tán mã độc qua thiết bị USB.'],
+  q:'Bạn nhặt được chiếc USB này. Bạn sẽ làm gì?',
+  hint:'Một thiết bị lạ, không rõ nguồn gốc không nên được cắm vào bất kỳ máy nào, kể cả "chỉ để xem thử".',
+  opts:[
+   {t:'Cắm vào máy cá nhân để xem file "LƯƠNG THƯỞNG Q4" trước',why:'Cắm USB lạ vào bất kỳ máy nào, kể cả máy cá nhân, có thể khiến mã độc lây lan ngay lập tức, bất kể nội dung tên file hấp dẫn thế nào.'},
+   {t:'Mang USB giao nộp cho bộ phận an ninh/IT, không cắm vào bất kỳ máy nào',ok:1},
+   {t:'Cắm vào máy công ty vì máy công ty có phần mềm diệt virus',why:'Phần mềm diệt virus không chặn được mọi loại mã độc, đặc biệt là các kỹ thuật tấn công qua phần cứng USB được thiết kế riêng.'},
+   {t:'Bỏ lại USB ở chỗ cũ và không báo cho ai',why:'Không báo cáo khiến thiết bị vẫn còn đó để người khác vô tình nhặt và cắm vào máy của họ.'}
+  ],
+  summary:'Phương án đúng là <b>giao nộp cho bộ phận an ninh/IT mà không cắm vào máy nào</b>. USB không rõ nguồn gốc là thủ đoạn tấn công phổ biến (USB drop attack); không bao giờ nên cắm thử.'},
+{tag:'SCENARIO · PUBLIC WI-FI',bar:'NETWORK LOG · WI-FI CONNECTION',
+  head:'Mạng phát hiện: "Free_Cafe_WiFi" và "Free_Cafe_WiFi_5G" (giả lập)',status:'UNENCRYPTED NETWORK',
+  logs:['Hai mạng Wi-Fi gần giống tên quán cà phê cùng xuất hiện, một mạng không yêu cầu mật khẩu.','Bạn cần đăng nhập vào hệ thống email công ty trong lúc đang ở quán.','Mạng không mật khẩu có thể là điểm phát sóng giả do kẻ tấn công dựng lên để nghe lén.'],
+  q:'Bạn cần kiểm tra email công việc khi đang ở quán cà phê. Bạn sẽ làm gì?',
+  hint:'Hãy nghĩ đến việc xác minh mạng đúng với nhân viên quán, hoặc dùng một kết nối mà bạn kiểm soát được.',
+  opts:[
+   {t:'Kết nối ngay vào mạng không mật khẩu vì tiện và nhanh',why:'Mạng Wi-Fi công cộng không mật khẩu rất dễ bị kẻ tấn công dựng giả để nghe lén dữ liệu đăng nhập của bạn.'},
+   {t:'Hỏi nhân viên quán tên mạng chính xác, hoặc dùng 4G/hotspot cá nhân kèm VPN nếu có',ok:1},
+   {t:'Kết nối vào mạng có tên gần giống nhất vì chắc là mạng thật',why:'Tên mạng gần giống là dấu hiệu điển hình của mạng giả mạo (evil twin), không nên dùng để suy đoán độ tin cậy.'},
+   {t:'Tắt Wi-Fi trên điện thoại nhưng vẫn dùng máy tính công ty kết nối mạng đó',why:'Vấn đề nằm ở việc kết nối vào mạng không xác thực được, không phải thiết bị nào kết nối; máy tính công ty vẫn gặp rủi ro tương tự.'}
+  ],
+  summary:'Phương án đúng là <b>xác minh tên mạng với nhân viên quán hoặc dùng kết nối riêng (4G/hotspot) kèm VPN</b>. Không nên tin vào mạng Wi-Fi công cộng không xác thực được để xử lý dữ liệu công việc.'},
+{tag:'SCENARIO · SMS SCAM',bar:'MESSAGE LOG · SMS GATEWAY',
+  head:'Từ: "VIETBANK" (giả lập, số gửi lạ)',status:'SUSPECTED SMISHING',
+  logs:['Nội dung: "Tài khoản của bạn vừa phát sinh giao dịch 15.000.000đ. Nếu không phải bạn, bấm vào link để hủy ngay: bit.ly/xxxx".','Số điện thoại gửi không trùng với tổng đài chính thức của ngân hàng.','Liên kết rút gọn khiến không thể biết trước địa chỉ thật sẽ dẫn tới đâu.'],
+  q:'Bạn nhận được tin nhắn này trên điện thoại cá nhân. Bạn sẽ làm gì?',
+  hint:'Không bấm vào liên kết trong tin nhắn lạ; hãy tự mở ứng dụng ngân hàng hoặc gọi số tổng đài chính thức để kiểm tra.',
+  opts:[
+   {t:'Bấm vào liên kết ngay để hủy giao dịch trước khi bị trừ tiền',why:'Bấm vào liên kết rút gọn trong tin nhắn lạ có thể dẫn tới trang giả mạo nhằm đánh cắp thông tin đăng nhập ngân hàng.'},
+   {t:'Không bấm link, tự mở ứng dụng ngân hàng hoặc gọi tổng đài chính thức để kiểm tra',ok:1},
+   {t:'Nhắn tin lại số đó để hỏi thông tin giao dịch',why:'Nhắn tin lại cho kẻ lừa đảo chỉ xác nhận số điện thoại của bạn đang hoạt động, không giúp xác minh được gì.'},
+   {t:'Chia sẻ tin nhắn lên mạng xã hội để hỏi mọi người có đúng không',why:'Mất thời gian xác minh công khai trong khi mối đe dọa thật (nếu có) cần được kiểm tra qua kênh chính thức của ngân hàng, không phải mạng xã hội.'}
+  ],
+  summary:'Phương án đúng là <b>không bấm link, tự mở ứng dụng hoặc gọi tổng đài chính thức của ngân hàng để kiểm tra</b>. Tin nhắn giả danh ngân hàng (smishing) luôn tạo áp lực và dùng liên kết rút gọn để che giấu địa chỉ thật.'},
+{tag:'SCENARIO · CEO FRAUD',bar:'CHAT LOG · INTERNAL MESSAGING',
+  head:'Từ: "Giám đốc Tài chính" (giả lập, tài khoản chat mới tạo)',status:'UNVERIFIED REQUEST',
+  logs:['Tin nhắn: "Tôi đang họp gấp, cần bạn chuyển khoản 80 triệu cho đối tác X ngay trong 15 phút, tôi sẽ giải thích sau".','Tài khoản chat được tạo chỉ vài giờ trước, ảnh đại diện khác với tài khoản chính thức của giám đốc.','Yêu cầu nhấn mạnh phải giữ bí mật và xử lý gấp, không qua email công việc như thường lệ.'],
+  q:'Bạn nhận được yêu cầu chuyển khoản khẩn này. Bạn sẽ làm gì?',
+  hint:'Một yêu cầu chuyển tiền khẩn, bất thường và yêu cầu giữ bí mật là dấu hiệu kinh điển của lừa đảo giả danh lãnh đạo (CEO fraud).',
+  opts:[
+   {t:'Chuyển khoản ngay vì sợ trễ giờ và làm phật ý cấp trên',why:'Làm theo áp lực thời gian mà không xác minh là đúng điều kẻ lừa đảo mong muốn; tiền chuyển đi khó có thể lấy lại.'},
+   {t:'Dừng lại, xác minh trực tiếp với giám đốc qua số điện thoại hoặc kênh chính thức đã biết trước đó',ok:1},
+   {t:'Nhắn hỏi lại chính tài khoản chat đó xem có đúng là giám đốc không',why:'Hỏi lại chính kẻ giả mạo không giúp xác minh được gì, vì kẻ tấn công chắc chắn sẽ xác nhận là thật.'},
+   {t:'Chuyển một phần số tiền nhỏ hơn để giảm rủi ro',why:'Chuyển bất kỳ số tiền nào khi chưa xác minh được danh tính người yêu cầu vẫn là hành động rủi ro và sai nguyên tắc.'}
+  ],
+  summary:'Phương án đúng là <b>dừng lại và xác minh trực tiếp qua kênh chính thức đã biết trước đó</b>, không qua chính tài khoản gửi yêu cầu. Yêu cầu chuyển tiền khẩn kèm áp lực bí mật là dấu hiệu lừa đảo giả danh lãnh đạo.'},
+{tag:'SCENARIO · APP PERMISSIONS',bar:'APP INSTALL LOG · MOBILE DEVICE',
+  head:'Ứng dụng: "QR Scanner Pro" (giả lập, vừa cài đặt)',status:'EXCESSIVE PERMISSIONS',
+  logs:['Ứng dụng quét mã QR yêu cầu quyền truy cập danh bạ, tin nhắn, vị trí và quyền quản trị thiết bị.','Các quyền này không cần thiết cho chức năng quét mã QR cơ bản.','Ứng dụng được tải từ một đường link ngoài kho ứng dụng chính thức.'],
+  q:'Ứng dụng yêu cầu các quyền này ngay khi mở lần đầu. Bạn sẽ làm gì?',
+  hint:'Hãy so sánh quyền được yêu cầu với chức năng thực tế của ứng dụng — chênh lệch lớn là một dấu hiệu cảnh báo.',
+  opts:[
+   {t:'Đồng ý hết tất cả quyền để dùng được ứng dụng ngay',why:'Cấp toàn bộ quyền cho một ứng dụng không rõ nguồn gốc có thể để lộ danh bạ, tin nhắn và vị trí của bạn cho kẻ xấu.'},
+   {t:'Từ chối các quyền không cần thiết, gỡ ứng dụng và chỉ cài phần mềm quét QR từ kho ứng dụng chính thức',ok:1},
+   {t:'Chỉ đồng ý quyền vị trí vì nghĩ quyền đó ít nguy hiểm nhất',why:'Ứng dụng không rõ nguồn gốc với nhiều quyền bất thường nên bị gỡ bỏ hoàn toàn, không nên cấp bất kỳ quyền nhạy cảm nào.'},
+   {t:'Giữ ứng dụng nhưng tắt wifi mỗi khi dùng để "an toàn hơn"',why:'Tắt wifi không ngăn được việc ứng dụng đọc dữ liệu cục bộ như danh bạ hay tin nhắn, và dữ liệu vẫn có thể bị gửi đi khi có mạng trở lại.'}
+  ],
+  summary:'Phương án đúng là <b>từ chối các quyền không cần thiết, gỡ ứng dụng và chỉ cài phần mềm từ kho ứng dụng chính thức</b>. Quyền truy cập yêu cầu phải tương xứng với chức năng thực tế của ứng dụng.'}
+];
+const PHASE2_COUNT=Math.min(3,SCENARIOS2.length);
+LEVELS.push({
+  key:'SECURITY KEY 05-B',phase:'PHASE 2 · THE DECISION',name:'LEVEL 05 · PHASE 2 · THE DECISION',max:360,time:360,
+  alertTitle:'ACCOUNT BREACH DETECTED',
+  alert:['<b>Multiple social-engineering attempts detected.</b>','Every second counts, but a wrong move can make things worse.','Phase 2: xử lý lần lượt '+PHASE2_COUNT+' tình huống xâm nhập/lừa đảo được chọn ngẫu nhiên.'],
+  hint:()=>L.scenarios[Math.min(L.p,L.scenarios.length-1)].hint,
+  start(st){
+    L.scenarios=shuffle(SCENARIOS2).slice(0,PHASE2_COUNT);
+    L.n=L.scenarios.length;L.p=0;L.cur=0;
+    const render=()=>{
+      const sc=L.scenarios[L.cur];L.opts=shuffle(sc.opts);
+      st.innerHTML=`<div class="prompt"><b>PHASE 2/4 · THE DECISION</b> · <b>${sc.tag}</b> — Tình huống ${L.p+1}/${L.n}.</div>
+        <div class="mail"><div class="mail-bar"><i></i><i></i><i></i>&nbsp;${sc.bar}</div>
+          <div class="mail-head"><div>${sc.head}</div><div>Trạng thái: <b style="font-weight:400;color:var(--danger)">${sc.status}</b></div></div>
+          <div class="mail-body">${sc.logs.map(l=>`<div>${l}</div>`).join('')}</div></div>
+        <div class="panel"><h3>${sc.q}</h3><div id="opts">${L.opts.map((o,i)=>`<button class="opt" data-i="${i}">${o.t}</button>`).join('')}</div></div>`;
+      st.scrollTop=0;$('#stage').parentElement.scrollTop=0;
+    };
+    render();
+    st.onclick=e=>{
+      const o=e.target.closest('.opt');if(!o||L.done)return;
+      sfx.click();const p=L.opts[+o.dataset.i];
+      if(!p.ok)return api.wrong(p.why);
+      L.p++;hud();
+      if(L.p<L.n){L.cur++;return render();}
+      api.done('ALL DECISIONS CORRECT',
+        `<p>Bạn đã xử lý đúng cả ${L.n} tình huống:</p><ul>${L.scenarios.map(s=>`<li><b>${s.tag}:</b> ${s.summary}</li>`).join('')}</ul><p><b>Ghi nhớ:</b> kẻ tấn công thường tạo áp lực và sự khẩn cấp để bạn hành động vội vàng — luôn dừng lại, xác minh qua kênh chính thức rồi mới hành động.</p>`);
+    };
+  }
+});
+
+/* ---- PHASE 3: RESTORE THE SYSTEM (3 tình huống nối tiếp) ---- */
+const RESTORES=[
+{tag:'RESTORE 1/3 · CORE DATABASE',context:'Hệ thống dữ liệu lõi bị hỏng và phải được phục hồi. Có 3 bản sao lưu giả lập.',
+  hint:'Đừng chỉ nhìn vào thời điểm. Hãy xem trạng thái của từng bản sao lưu.',
+  backups:[
+    {id:'A',when:'2 ngày trước',state:'Hoàn chỉnh',why:'Bản này cũ hơn nên bạn mất nhiều dữ liệu hơn. Quan trọng hơn, “hoàn chỉnh” chưa có nghĩa là đã được kiểm tra tính toàn vẹn.'},
+    {id:'B',when:'1 ngày trước',state:'Có cảnh báo lỗi',why:'Bản sao lưu đang có cảnh báo lỗi. Phục hồi từ bản này có thể đưa dữ liệu hỏng trở lại hệ thống.'},
+    {id:'C',when:'6 giờ trước',state:'Đã xác minh toàn vẹn',ok:1}
+  ],
+  summary:'Chọn <b>Backup C</b>: bản mới nhất <i>và</i> đã được xác minh toàn vẹn. Backup B mới hơn A nhưng đang có cảnh báo lỗi; Backup A chỉ “hoàn chỉnh”, chưa xác minh và cũ hơn nhiều.'},
+{tag:'RESTORE 2/3 · FILE SERVER',context:'Máy chủ lưu trữ tệp vừa bị ransomware tấn công và cần khôi phục. Có 3 bản sao lưu giả lập.',
+  hint:'Một bản sao lưu được tạo ra ngay trong lúc mã độc đang hoạt động có đáng tin không?',
+  backups:[
+    {id:'D',when:'3 ngày trước',state:'Hoàn chỉnh, chưa xác minh',why:'Bản này cũ hơn các lựa chọn khác và chưa được xác minh toàn vẹn, nên không nên ưu tiên khi có lựa chọn tốt hơn.'},
+    {id:'E',when:'10 phút trước',state:'Được tạo trong lúc mã độc đang hoạt động',why:'Bản sao lưu được tạo trong lúc mã độc đang hoạt động có thể đã chứa mã độc hoặc dữ liệu đã bị mã hóa.'},
+    {id:'F',when:'8 giờ trước',state:'Đã xác minh toàn vẹn, tạo trước khi mã độc xuất hiện',ok:1}
+  ],
+  summary:'Chọn <b>Backup F</b>: được tạo trước khi mã độc xuất hiện và đã xác minh toàn vẹn. Backup E rất mới nhưng được tạo ngay trong lúc tấn công nên có nguy cơ nhiễm mã độc.'},
+{tag:'RESTORE 3/3 · WEBSITE DATABASE',context:'Cơ sở dữ liệu website bị lỗi sau một đợt bảo trì và cần khôi phục. Có 3 bản sao lưu giả lập.',
+  hint:'Một bản an toàn nhưng quá cũ có thể khiến bạn mất rất nhiều dữ liệu gần đây — hãy so sánh với các lựa chọn còn lại.',
+  backups:[
+    {id:'G',when:'Vài phút trước',state:'Quá trình sao lưu bị gián đoạn giữa chừng',why:'Bản sao lưu bị gián đoạn giữa chừng có thể thiếu hoặc hỏng dữ liệu, không nên dùng để phục hồi.'},
+    {id:'H',when:'1 tuần trước',state:'Đã xác minh toàn vẹn nhưng quá cũ',why:'Bản này an toàn nhưng quá cũ — bạn sẽ mất rất nhiều dữ liệu gần đây trong khi có một lựa chọn mới hơn và vẫn an toàn.'},
+    {id:'I',when:'4 giờ trước',state:'Đã xác minh toàn vẹn',ok:1}
+  ],
+  summary:'Chọn <b>Backup I</b>: mới nhất trong số các bản an toàn và đã xác minh toàn vẹn. Backup G không đáng tin vì sao lưu bị gián đoạn; Backup H an toàn nhưng làm mất nhiều dữ liệu hơn mức cần thiết.'}
+];
+async function restoreFx(st,r,id){
+  L.busy=true;
+  st.innerHTML=`<div class="prompt"><b>RESTORING SYSTEM</b> · Đang phục hồi từ Backup ${id}...</div><pre id="fx" class="term"></pre>
+    <div class="progress" style="width:100%;margin-top:14px"><div id="rbar" style="height:100%;width:0;background:var(--bright);transition:width .6s var(--ease)"></div></div>`;
+  const lines=[`> VERIFYING BACKUP ${id} INTEGRITY ........... [OK]`,'> ISOLATING AFFECTED SYSTEM ............... [OK]','> RESTORING DATABASE ..................... [OK]','> RESTORING USER FILES ................... [OK]','> REBUILDING FIREWALL RULES .............. [OK]','> SYSTEM STATUS: RESTORED'];
+  const el=$('#fx');
+  try{
+    for(let i=0;i<lines.length;i++){
+      for(const ch of lines[i]){el.textContent+=ch;await sleep(9)}
+      el.textContent+='\n';$('#rbar').style.width=((i+1)/lines.length*100)+'%';sfx.click();await sleep(260);
+    }
+  }finally{
+    L.busy=false;
+  }
+}
+LEVELS.push({
+  key:'SECURITY KEY 05-C',phase:'PHASE 3 · RESTORE THE SYSTEM',name:'LEVEL 05 · PHASE 3 · RESTORE THE SYSTEM',max:320,time:360,
+  alertTitle:'SYSTEM RECOVERY REQUIRED',
+  alert:['<b>Core data is damaged and must be restored.</b>','Three recovery situations await. Only one backup per situation is safe to trust.','Phase 3: xử lý lần lượt '+RESTORES.length+' tình huống khôi phục hệ thống.'],
+  hint:()=>RESTORES[Math.min(L.p,RESTORES.length-1)].hint,
+  start(st){
+    L.n=RESTORES.length;L.p=0;L.cur=0;L.busy=false;
+    const render=()=>{
+      const r=RESTORES[L.cur];
+      st.innerHTML=`<div class="prompt"><b>PHASE 3/4 · RESTORE THE SYSTEM</b> · <b>${r.tag}</b> — ${L.p}/${RESTORES.length} đã khôi phục xong.<br>${r.context}</div>
+        <div class="cards">${r.backups.map(b=>`<div class="card"><div class="tag">BACKUP ${b.id}</div>
+          <dl><dt>Thời điểm</dt><dd>${b.when}</dd><dt>Trạng thái</dt><dd>${b.state}</dd></dl>
+          <button class="btn pick" data-b="${b.id}">RESTORE FROM BACKUP ${b.id}</button></div>`).join('')}</div>`;
+      st.scrollTop=0;$('#stage').parentElement.scrollTop=0;
+    };
+    render();
+    st.onclick=async e=>{
+      const k=e.target.closest('[data-b]');if(!k||L.done||L.busy)return;
+      sfx.click();const r=RESTORES[L.cur],b=r.backups.find(x=>x.id===k.dataset.b);
+      if(!b)return;
+      if(!b.ok)return api.wrong(`<b>Backup ${b.id}</b> (${b.when}, ${b.state.toLowerCase()}). ${b.why}`);
+      await restoreFx(st,r,b.id);
+      if(L.done)return;
+      L.p++;L.cur++;hud();
+      if(L.p<RESTORES.length)return render();
+      api.done('SYSTEM RESTORED',
+        `<p>Bạn đã phục hồi đúng cả ${RESTORES.length} tình huống:</p><ul>${RESTORES.map(x=>`<li><b>${x.tag}:</b> ${x.summary}</li>`).join('')}</ul><p><b>Ghi nhớ:</b> phải kiểm tra tính toàn vẹn của bản sao lưu trước khi phục hồi, và bản mới nhất không phải lúc nào cũng là bản an toàn nhất.</p>`);
+    };
+  }
+});
+
+/* ---- PHASE 4: FINAL FIREWALL (350 XP) ---- */
+const PAIRS=[
+{k:'Account Security',s:'Sử dụng MFA và mật khẩu riêng biệt',fix:'bảo vệ tài khoản khỏi bị đăng nhập trái phép',why:'MFA thêm lớp xác thực thứ hai, còn mật khẩu riêng biệt giúp một mật khẩu bị lộ không kéo theo các tài khoản khác.',hint:'Rủi ro chính là kẻ gian đăng nhập vào tài khoản của bạn.'},
+{k:'Phishing Protection',s:'Xác minh nguồn gửi',fix:'kiểm tra người gửi có thật sự đáng tin hay không',why:'Kiểm tra địa chỉ gửi và xác minh qua kênh chính thức giúp nhận ra thư giả mạo trước khi bấm.',hint:'Phishing dùng thư giả mạo. Bạn cần kiểm tra thư đến từ đâu.'},
+{k:'Personal Data Privacy',s:'Hạn chế chia sẻ thông tin cá nhân',fix:'giảm lượng thông tin về bạn có thể bị lợi dụng',why:'Càng ít thông tin cá nhân bị công khai thì kẻ gian càng khó giả mạo, đoán mật khẩu hoặc nhắm vào bạn.',hint:'Hãy nghĩ tới việc bạn đăng gì và cho ai biết gì về mình.'},
+{k:'Information Verification',s:'Kiểm tra và đối chiếu nguồn tin',fix:'đánh giá độ tin cậy của thông tin',why:'Đối chiếu nhiều nguồn đáng tin giúp phát hiện tin giả và thông tin sai lệch trước khi tin hoặc chia sẻ.',hint:'Vấn đề ở đây là tin giả, tin sai. Bạn cần so sánh các nguồn.'},
+{k:'Data Backup',s:'Duy trì bản sao lưu có thể khôi phục',fix:'đảm bảo dữ liệu có thể phục hồi khi gặp sự cố',why:'Sao lưu định kỳ và thử khôi phục để dữ liệu không mất vĩnh viễn khi gặp mã độc hoặc hỏng hóc.',hint:'Hãy nghĩ tới việc dữ liệu bị mất hoặc bị mã hóa và bạn cần lấy lại.'},
+{k:'Software Updates',s:'Cập nhật phần mềm và vá lỗi thường xuyên',fix:'vá các lỗ hổng mà kẻ tấn công có thể khai thác',why:'Các bản cập nhật thường sửa những lỗ hổng bảo mật đã biết; không cập nhật nghĩa là để lỗ hổng mở sẵn cho kẻ tấn công.',hint:'Kẻ tấn công thường khai thác lỗ hổng phần mềm đã biết nhưng chưa được vá.'},
+{k:'Network Monitoring',s:'Giám sát nhật ký và lưu lượng mạng bất thường',fix:'phát hiện sớm dấu hiệu xâm nhập trước khi thiệt hại lan rộng',why:'Theo dõi nhật ký và lưu lượng mạng giúp phát hiện hành vi bất thường sớm, trước khi kẻ tấn công gây thiệt hại lớn.',hint:'Vấn đề ở đây là phát hiện sớm một cuộc tấn công đang diễn ra.'},
+{k:'Incident Response Plan',s:'Xây dựng quy trình ứng phó sự cố rõ ràng',fix:'đảm bảo phản ứng nhanh và đúng cách khi sự cố xảy ra',why:'Một quy trình rõ ràng giúp mọi người biết phải làm gì ngay khi sự cố xảy ra, giảm thời gian phản ứng và sai sót.',hint:'Khi sự cố xảy ra, mọi người cần biết chính xác phải làm gì và theo thứ tự nào.'}
+];
+LEVELS.push({
+  key:'SECURITY KEY 05-D',phase:'PHASE 4 · FINAL FIREWALL',name:'LEVEL 05 · PHASE 4 · FINAL FIREWALL',max:560,time:540,
+  alertTitle:'FINAL FIREWALL ONLINE',
+  alert:['<b>The last layer needs your final verification.</b>','Match each security problem with its correct solution.','Phase 4: ghép '+PAIRS.length+' vấn đề với giải pháp phù hợp để khóa lớp phòng thủ cuối cùng.'],
+  hint:()=>{const i=L.selP!=null?L.selP:PAIRS.findIndex((_,k)=>!L.sol.has(k));return i>=0?PAIRS[i].hint:'Hãy xem lại các cặp còn lại.'},
+  start(st){
+    L.n=PAIRS.length;L.p=0;L.sol=new Set();L.selP=null;L.selS=null;L.order=shuffle(PAIRS.map((_,i)=>i));
+    st.innerHTML=`<div class="prompt"><b>PHASE 4/4 · FINAL FIREWALL</b> · Chọn một <b>vấn đề</b> ở cột trái và <b>giải pháp</b> tương ứng ở cột phải. Cặp đúng sẽ được khóa lại.</div>
+      <div class="cards"><div><div class="small">VẤN ĐỀ</div>${PAIRS.map((p,i)=>`<button class="opt" data-p="${i}">${p.k}</button>`).join('')}</div>
+        <div><div class="small">GIẢI PHÁP</div>${L.order.map(i=>`<button class="opt" data-s="${i}">${PAIRS[i].s}</button>`).join('')}</div></div>
+      <div class="panel"><h3>Phân tích</h3><div id="cnt" class="small">Đã ghép: 0/${PAIRS.length}</div><div id="info" class="info">Chọn một vấn đề rồi chọn giải pháp phù hợp.</div></div>`;
+    st.scrollTop=0;$('#stage').parentElement.scrollTop=0;
+    const mark=()=>{$$('[data-p]',st).forEach(b=>b.classList.toggle('sel',+b.dataset.p===L.selP));$$('[data-s]',st).forEach(b=>b.classList.toggle('sel',+b.dataset.s===L.selS))};
+    st.onclick=e=>{
+      const b=e.target.closest('.opt');if(!b||L.done||b.classList.contains('done'))return;
+      sfx.click();
+      if(b.dataset.p!=null)L.selP=L.selP===+b.dataset.p?null:+b.dataset.p;
+      else L.selS=L.selS===+b.dataset.s?null:+b.dataset.s;
+      mark();
+      if(L.selP==null||L.selS==null)return;
+      const p=L.selP,s=L.selS;L.selP=L.selS=null;mark();
+      if(p!==s)return api.wrong(`<b>${PAIRS[s].s}</b> chủ yếu giúp ${PAIRS[s].fix}, nên chưa giải quyết đúng rủi ro của <b>${PAIRS[p].k}</b>.`);
+      L.sol.add(p);L.p=L.sol.size;sfx.ok();
+      $$(`[data-p="${p}"],[data-s="${p}"]`,st).forEach(x=>{x.classList.add('done');x.disabled=true});
+      $('#info').innerHTML=`<b>${PAIRS[p].k} → ${PAIRS[p].s}</b><br>${PAIRS[p].why}`;
+      $('#cnt').textContent=`Đã ghép: ${L.sol.size}/${PAIRS.length}`;hud();
+      if(L.sol.size===PAIRS.length)api.done('FINAL FIREWALL ONLINE',
+        `<p>Bạn đã ghép đúng cả ${PAIRS.length} lớp phòng thủ:</p><ul>${PAIRS.map(x=>`<li><b>${x.k}</b> → ${x.s}</li>`).join('')}</ul><p><b>Ghi nhớ:</b> an toàn thông tin là sự kết hợp của nhiều lớp bảo vệ, và con người là lớp quan trọng nhất.</p>`);
+    };
+  }
+});
+
+/* ===== Gắn sự kiện & khởi động ===== */
+$('#initBtn').onclick=()=>{sfx.click();boot()};
+$('#contBtn').onclick=()=>{sfx.click();S.done||S.level>=LEVELS.length?endGame():startLevel(S.level)};
+$('#storyGo').onclick=()=>{sfx.click();startLevel(0)};
+$('#story').addEventListener('click',()=>{skip=true});
+$('#replayBtn').onclick=()=>{sfx.click();S={...fresh(),muted:S.muted};save();startLevel(0)};
+$('#muteBtn').onclick=()=>{S.muted=!S.muted;save();$('#muteBtn').textContent=S.muted?'🔇':'🔊'};
+$('#muteBtn').textContent=S.muted?'🔇':'🔊';
+if(S.done||S.scores.some(Boolean)){const b=$('#contBtn');b.hidden=false;b.textContent=S.done?'VIEW RESULT':'CONTINUE'}
+hud();
+
+</script>
+<script src="/shared/cv-nav.js" defer></script>
+</body>
+</html>
