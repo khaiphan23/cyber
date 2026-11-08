@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cyber Escape: The Last Firewall – Level 02</title>
+<style>
+/* Cyber Escape – giao diện tối giản theo phong cách file mẫu (nền đen, viền mảnh, nút dạng viên thuốc, màu nhấn teal) */
+:root{--ground:#050505;--panel:#0e0e0e;--hair:#222;--hair2:#303030;--bright:#f2f2f2;--read:#a6a9ad;--meta:#8a8d91;--live:#3fd6c6;--ink:#0a0a0a;--warn:#d9b45a;--danger:#e5736a;
+--face:"Inter","Noto Sans","Open Sans",Roboto,"Segoe UI",Arial,sans-serif;--mono:"IBM Plex Mono",Consolas,Menlo,monospace;
+--gutter:48px;--gap:24px;--max:1360px;--r:6px;--pill:999px;--dur:180ms;--ease:cubic-bezier(.22,.61,.36,1)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--ground) radial-gradient(ellipse 70% 38% at 50% -6%,rgba(255,255,255,.16),transparent 70%) no-repeat fixed;color:var(--bright);font:17px/1.6 var(--face);overflow:hidden}
+h1,h2,h3{margin:.3em 0;font-weight:400;line-height:1.25}
+p{margin:.6em 0}
+@keyframes rise{from{opacity:0;transform:translateY(12px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:14px;padding:24px max(var(--gutter),calc((100% - var(--max))/2));overflow:auto}
+.screen.active{display:flex}
+.screen.active>*{animation:rise .5s var(--ease) both}
+.screen.active>*:nth-child(2){animation-delay:.07s}.screen.active>*:nth-child(3){animation-delay:.14s}.screen.active>*:nth-child(n+4){animation-delay:.2s}
+#intro,#story,#end{max-width:none;padding-top:10vh}
+#intro>*,#story>*,#end>*{max-width:900px}
+.eyebrow,.small,.dim,.tagline{color:var(--read);font-size:16px}
+.eyebrow{font-family:var(--mono);letter-spacing:.2em;font-size:14px}
+.title{font-size:clamp(34px,5vw,48px);margin:.1em 0;color:var(--bright)}
+.tagline{font-style:normal;color:var(--bright)}
+.small{font-size:14px;color:var(--meta)}
+/* nút */
+.btn{font:inherit;font-size:16px;cursor:pointer;background:transparent;color:var(--bright);border:1px solid var(--hair2);border-radius:var(--pill);padding:9px 20px;transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),color var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.btn:hover{border-color:var(--bright);transform:translateY(-1px)}.btn:active{transform:scale(.98)}
+.btn.big,.btn.g,.m-btns .btn:first-child{background:var(--bright);color:var(--ink);border-color:var(--bright)}
+.btn.big:hover,.btn.g:hover,.m-btns .btn:first-child:hover{background:#fff}
+.btn.big{font-size:17px;padding:11px 28px}
+.btn.alt{color:var(--read)}.btn.alt:hover{color:var(--bright)}
+.m-btns .btn.alt:first-child{background:var(--bright);color:var(--ink)}
+.small-btn{padding:3px 14px;font-size:13px}
+.btn:focus-visible,.opt:focus-visible,.hot:focus-visible,input:focus-visible{outline:2px solid var(--bright);outline-offset:3px}
+.icon-btn{position:fixed;top:12px;right:14px;z-index:65;background:var(--panel);border:1px solid var(--hair2);color:var(--bright);width:34px;height:34px;border-radius:var(--pill);cursor:pointer}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.term{width:100%;white-space:pre-wrap;font:15px/1.8 var(--mono);color:var(--read);background:var(--panel);border:1px solid var(--hair);border-radius:var(--r);padding:20px;min-height:260px;margin:0}
+/* HUD */
+#game{padding-top:20px}
+.hud{width:100%;display:flex;gap:14px 20px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--panel);border:1px solid var(--hair);border-radius:var(--r);padding:14px 20px;font-size:14px;color:var(--read);margin-right:0}
+.hud b{color:var(--bright);font-weight:400}
+.hud-r{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.progress{width:200px;height:4px;background:var(--hair);border-radius:var(--pill);overflow:hidden;margin-top:6px}
+#bar{height:100%;width:0;background:var(--bright);transition:width .6s var(--ease)}
+.key{display:inline-block;border:1px solid var(--hair2);color:var(--meta);padding:0 9px;border-radius:var(--pill);margin-left:4px;font-size:13px}
+.key.on{color:var(--live);border-color:var(--live)}
+#timer.over{color:var(--danger)}
+#stage{width:100%;flex:1}
+.prompt{border-left:2px solid var(--hair2);padding:4px 16px;margin-bottom:var(--gap);color:var(--read)}
+.prompt b{color:var(--bright);font-weight:400}
+.panel{background:var(--panel);border:1px solid var(--hair);border-radius:var(--r);padding:20px;margin-top:var(--gap)}
+.panel h3{margin:0 0 10px;font-size:20px}
+/* Level 1 */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
+.card{background:var(--panel);border:1px solid var(--hair);border-radius:var(--r);padding:20px;display:grid;grid-template-columns:88px 1fr;gap:4px 16px;align-items:center;transition:border-color var(--dur) var(--ease)}
+.card:hover{border-color:var(--hair2)}
+.card.flag{border-color:var(--danger)}
+.card h3{margin:0;font-size:20px}
+.tag{grid-column:1/3;color:var(--meta);font:13px var(--mono);letter-spacing:.1em}
+.av{width:84px;height:84px;grid-row:span 2;margin-top:8px;border-radius:50%;box-shadow:0 0 0 3px #1c1c1c,0 0 0 4px var(--hair2)}
+.user{color:var(--read);font:14px var(--mono)}
+.bio{grid-column:1/3;color:var(--read);margin:8px 0}
+.card dl{grid-column:1/3;display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:15px;border-top:1px solid var(--hair);padding-top:10px;margin:0}
+.card dt{color:var(--meta)}.card dd{margin:0}
+.card .pick{grid-column:1/3;margin-top:10px}
+.checks{display:grid;gap:8px;margin-bottom:14px}
+.checks label{display:flex;gap:12px;align-items:center;padding:10px 14px;border:1px solid var(--hair2);border-radius:var(--r);cursor:pointer;color:var(--read);transition:border-color var(--dur) var(--ease),color var(--dur) var(--ease)}
+.checks label:hover{border-color:var(--bright);color:var(--bright)}
+.checks input{accent-color:var(--bright);width:18px;height:18px}
+/* Level 2 */
+.mail-wrap{display:grid;grid-template-columns:2fr 1fr;gap:var(--gap);align-items:start}
+.mail{background:var(--panel);border:1px solid var(--hair);border-radius:var(--r);overflow:hidden}
+.mail-bar{background:var(--ground);border-bottom:1px solid var(--hair);padding:8px 16px;color:var(--meta);font:12px var(--mono);display:flex;gap:6px;align-items:center;letter-spacing:.08em}
+.mail-bar i{width:9px;height:9px;border-radius:50%;background:var(--hair2)}
+.mail-head{padding:14px 20px;border-bottom:1px solid var(--hair);display:grid;gap:4px;color:var(--read)}
+.mail-body{padding:20px;display:grid;gap:12px;color:var(--read)}
+.hot{cursor:pointer;border-bottom:1px dashed var(--warn);color:var(--bright);transition:background var(--dur)}
+.hot:hover{background:rgba(217,180,90,.18)}
+.hot.found{background:rgba(229,115,106,.18);border-bottom:1px solid var(--danger)}
+.btn-fake{display:inline-block;background:var(--hair2);padding:8px 22px;border-radius:var(--pill);border-bottom:none}
+.btn-fake.found{background:rgba(229,115,106,.3)}
+.info{min-height:90px;color:var(--read);font-size:15px}.info b{color:var(--bright);font-weight:400}
+.chip{display:inline-block;margin:6px 6px 0 0;padding:2px 10px;border:1px solid var(--hair2);border-radius:var(--r);color:var(--danger);font:12px var(--mono)}
+.opt{display:block;width:100%;text-align:left;margin-top:8px;padding:12px 16px;background:transparent;color:var(--read);border:1px solid var(--hair2);border-radius:var(--r);cursor:pointer;font:inherit;font-size:16px;transition:border-color var(--dur) var(--ease),color var(--dur) var(--ease)}
+.opt:hover{border-color:var(--bright);color:var(--bright)}
+.opt b{font-weight:400;color:var(--bright)}
+/* Modal */
+#overlay{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(5,5,5,.72) radial-gradient(ellipse 60% 40% at 50% 0,rgba(255,255,255,.14),transparent 70%);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);padding:16px;overflow:auto}
+#overlay.open{display:flex;animation:fade .3s var(--ease)}
+.modal{width:min(620px,100%);background:var(--panel);border:1px solid var(--hair2);border-radius:var(--r);padding:28px;text-align:left}
+.m-title{font-size:clamp(26px,4vw,38px);font-weight:400;color:var(--bright);line-height:1.2}
+.m-sub{color:var(--read);margin:6px 0 4px;font:14px var(--mono);letter-spacing:.04em}
+.modal.ok{border-color:var(--live)}.modal.ok .m-title{color:var(--live)}
+.modal.danger{border-color:var(--danger)}.modal.danger .m-title{color:var(--danger)}
+.modal.warn{border-color:var(--warn)}.modal.warn .m-title{color:var(--warn)}
+.m-body{color:var(--read);margin:14px 0 18px;font-size:16px}
+.m-body b{color:var(--bright);font-weight:400}
+.m-body ul{padding-left:20px;display:grid;gap:6px;margin:8px 0}
+.m-btns{display:flex;gap:12px;flex-wrap:wrap}
+#toast{position:fixed;right:20px;top:20px;background:var(--bright);color:var(--ink);padding:8px 16px;border-radius:var(--pill);font:13px var(--mono);z-index:80;opacity:0;transform:translateY(-8px);transition:.3s var(--ease);pointer-events:none}
+#toast.show{opacity:1;transform:none}
+/* Kết thúc */
+.status{font:14px var(--mono);letter-spacing:.12em;color:var(--live)}
+#end p{font-size:20px;color:var(--bright)}#end p.dim{font-size:17px;color:var(--read)}
+.stats{display:grid;gap:12px;background:var(--panel);border:1px solid var(--hair);border-radius:var(--r);padding:20px;min-width:min(460px,100%);color:var(--read)}
+.stats b{color:var(--bright);font-weight:400}
+.stats .rank{font-size:26px;color:var(--live);font-family:var(--face)}
+@media(max-width:900px){.cards,.mail-wrap{grid-template-columns:1fr}:root{--gutter:20px}body{overflow:auto}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+</style>
+</head>
+<body>
+<button id="muteBtn" class="icon-btn" title="Bật/tắt âm thanh">🔊</button>
+
+<!-- INTRO -->
+<section id="intro" class="screen active">
+  <div class="eyebrow">LEVEL 02 · PHISHING STORM</div>
+  <h1 class="glitch title" data-text="THE LAST FIREWALL">THE LAST FIREWALL</h1>
+  <p class="tagline">"The inbox is the new battlefield. Trust nothing. Verify everything."</p>
+  <button id="initBtn" class="btn big">INITIALIZE SYSTEM</button>
+  <button id="contBtn" class="btn alt" hidden>CONTINUE</button>
+  <p class="small">Mô phỏng giáo dục. Game không yêu cầu nhập mật khẩu hay thông tin cá nhân. Các email trong game đều là giả lập.</p>
+</section>
+
+<!-- BOOT + STORY -->
+<section id="story" class="screen">
+  <pre id="storyText" class="term"></pre>
+  <button id="storyGo" class="btn big" style="display:none">ENTER MAIL GATEWAY</button>
+  <p class="small">Nhấn vào màn hình để bỏ qua hiệu ứng gõ chữ</p>
+</section>
+
+<!-- GAME -->
+<section id="game" class="screen">
+  <header class="hud">
+    <div class="hud-l"><b id="lvl">LEVEL 02</b><div class="progress"><div id="bar"></div></div></div>
+    <div class="hud-m">KEYS <span id="keys"></span></div>
+    <div class="hud-r">
+      <span>XP <b id="xp">0 XP</b></span>
+      <span>BONUS <b id="pot">500</b></span>
+      <span>TIME <b id="timer">--:--</b></span>
+      <button id="hintBtn" class="btn small-btn alt">HINT (-25)</button>
+    </div>
+  </header>
+  <main id="stage"></main>
+</section>
+
+<!-- END -->
+<section id="end" class="screen">
+  <div class="status">[ SECURITY LAYER 02: RECOVERED ]</div>
+  <p>"Mail Gateway has been secured."</p>
+  <p class="dim">"Your journey is not over. More threats are waiting beyond the firewall."</p>
+  <div id="endStats" class="stats"></div>
+  <div class="row">
+    <button id="replayBtn" class="btn">REPLAY</button>
+    <button id="nextBtn" class="btn g">CONTINUE TO LEVEL 03</button>
+  </div>
+</section>
+
+<div id="overlay"></div>
+<div id="toast"></div>
+<script>
+'use strict';
+/* CYBER ESCAPE: THE LAST FIREWALL – script.js
+   Level 1 độc lập. Thêm màn mới: push một object vào mảng LEVELS (xem mục "LEVELS" bên dưới). */
+
+/* ===== Helpers & cấu hình ===== */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const SAVE_KEY='cyberEscape.lv2.save.v1', MAX_XP=500, HINT_COST=25, WRONG_COST=40, OVER_MULT=.8, MIN_XP=100;
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+
+/* ===== Lưu tiến trình (LocalStorage) ===== */
+const fresh=()=>({level:0,scores:[],keys:[],time:0,done:false,muted:false});
+let S=(()=>{try{return {...fresh(),...JSON.parse(localStorage.getItem(SAVE_KEY))}}catch(e){return fresh()}})();
+const save=()=>{try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}};
+const totalXP=()=>S.scores.reduce((a,b)=>a+(b||0),0);
+
+/* ===== Âm thanh (WebAudio, không cần file ngoài) ===== */
+let AC;
+function beep(f=440,d=.12,type='sine',v=.05,delay=0){
+  if(S.muted)return;
+  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+delay;
+    o.type=type;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);
+    o.start(t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.stop(t+d);}catch(e){}
+}
+const sfx={
+  click:()=>beep(660,.06,'square',.03),
+  ok:()=>{beep(523,.12);beep(784,.2,'sine',.05,.12)},
+  bad:()=>beep(160,.3,'sawtooth',.05),
+  key:()=>[523,659,784,1047].forEach((f,i)=>beep(f,.16,'triangle',.05,i*.1))
+};
+
+/* ===== UI chung ===== */
+function show(id){$$('.screen').forEach(s=>s.classList.remove('active'));$('#'+id).classList.add('active')}
+function modal({cls='',title,sub='',html='',buttons=[]}){
+  const o=$('#overlay');
+  o.innerHTML=`<div class="modal ${cls}"><div class="m-title">${title}</div>${sub?`<div class="m-sub">${sub}</div>`:''}<div class="m-body">${html}</div><div class="m-btns"></div></div>`;
+  buttons.forEach(b=>{const e=document.createElement('button');e.className='btn '+(b.cls||'');e.textContent=b.label;
+    e.onclick=()=>{sfx.click();closeModal();b.fn&&b.fn()};$('.m-btns',o).appendChild(e)});
+  o.classList.add('open');
+}
+const closeModal=()=>$('#overlay').classList.remove('open');
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+
+/* ===== Màn mở đầu & cốt truyện ===== */
+const BOOT=['> BOOTING CYBERVERSE DEFENSE KERNEL ........ [OK]','> LOADING SECURITY MODULES ................. [OK]','> CONNECTING TO LAST FIREWALL .............. [WARNING]',''];
+const STORY=['MISSION BRIEFING','Tuyến phòng thủ danh tính đã được khôi phục, nhưng kẻ tấn công chuyển sang MAIL GATEWAY.','Hàng loạt email giả mạo ngân hàng, hãng vận chuyển và người có thẩm quyền đang tràn vào hộp thư.','','Hãy phân tích từng email, tìm dấu hiệu lừa đảo và chọn cách xử lý an toàn.'];
+let skip=false;
+async function typeLines(el,lines){
+  skip=false;el.textContent='';
+  for(const l of lines){
+    for(const ch of l){if(skip){el.textContent=lines.join('\n');return}el.textContent+=ch;await sleep(12)}
+    el.textContent+='\n';await sleep(150);
+  }
+}
+async function boot(){
+  S={...fresh(),muted:S.muted};save();
+  show('story');const b=$('#storyGo');b.style.display='none';
+  await typeLines($('#storyText'),[...BOOT,...STORY]);
+  b.style.display='';
+}
+
+/* ===== Vòng đời một màn chơi ===== */
+let L=null,tick=null;
+const calcScore=()=>{let s=Math.max(MIN_XP,MAX_XP-L.wrong*WRONG_COST-L.hints*HINT_COST);return L.over?Math.round(s*OVER_MULT):s};
+function hud(){
+  const n=LEVELS.length,i=L?L.i:S.level;
+  $('#lvl').textContent='LEVEL 02';
+  $('#bar').style.width=(L&&L.c!=null?(L.c+(L.done?1:0))/CASES.length*100:0)+'%';
+  $('#keys').innerHTML=LEVELS.map((l,k)=>`<span class="key ${S.keys[k]?'on':''}" title="${l.key}">⚿</span>`).join('');
+  $('#xp').textContent=totalXP()+' XP';
+  if(L)$('#pot').textContent=calcScore();
+}
+function drawTimer(){const t=$('#timer');t.textContent=L.over?'OVERTIME':fmt(L.left);t.classList.toggle('over',L.over)}
+function startTimer(){
+  clearInterval(tick);
+  tick=setInterval(()=>{
+    if(!L||L.done)return;
+    L.elapsed++;
+    if(L.left>0)L.left--; else if(!L.over){L.over=true;toast('OVERTIME: điểm thưởng giảm 20%');hud()}
+    drawTimer();
+  },1000);
+  drawTimer();
+}
+function startLevel(i){
+  clearInterval(tick);
+  if(i>=LEVELS.length){L=null;return endGame()}
+  const lv=LEVELS[i];S.level=i;save();
+  L={i,lv,wrong:0,hints:0,left:lv.time,elapsed:0,over:false,done:false,step:0};
+  const st=$('#stage');st.onclick=null;st.innerHTML='';
+  show('game');hud();drawTimer();
+  modal({title:lv.alertTitle,sub:lv.name,html:lv.alert.map(t=>`<p>${t}</p>`).join(''),buttons:[{label:'START MISSION',fn:()=>{lv.start(st);startTimer()}}]});
+}
+const api={
+  wrong(msg){
+    L.wrong++;sfx.bad();hud();
+    modal({cls:'danger',title:'SYSTEM WARNING',sub:`-${WRONG_COST} XP bonus · bạn có thể thử lại`,html:msg,
+      buttons:[{label:'RETRY'},{label:'USE HINT',cls:'alt',fn:()=>$('#hintBtn').click()}]});
+  },
+  done(title,html){
+    L.done=true;clearInterval(tick);
+    const sc=calcScore(),idx=L.i,lv=L.lv;
+    S.scores[idx]=sc;S.keys[idx]=lv.key;S.time+=L.elapsed;S.level=idx+1;save();hud();sfx.key();
+    modal({cls:'ok',title,sub:`+${sc} XP &nbsp;|&nbsp; 🔑 ${lv.key} ACQUIRED`,html,
+      buttons:[{label:idx+1<LEVELS.length?'NEXT LEVEL':'RESTORE FIREWALL',fn:()=>startLevel(idx+1)}]});
+  }
+};
+$('#hintBtn').onclick=()=>{
+  if(!L||L.done)return;
+  L.hints++;hud();sfx.click();
+  modal({cls:'warn',title:'HINT',sub:`-${HINT_COST} XP bonus`,html:`<p>${L.lv.hint(L.step)}</p>`,buttons:[{label:'OK'}]});
+};
+
+/* ===== Màn kết thúc ===== */
+function endGame(){
+  S.done=true;save();
+  const xp=totalXP(),maxXP=LEVELS.length*MAX_XP;
+  const r=xp/maxXP,rank=r>=.9?'CYBER GUARDIAN':r>=.7?'DIGITAL DEFENDER':r>=.4?'CYBER EXPLORER':'ROOKIE AGENT';
+  $('#endStats').innerHTML=`<div>TOTAL XP: <b>${xp} / ${maxXP}</b></div><div>COMPLETION TIME: <b>${fmt(S.time)}</b></div>
+   <div>SECURITY KEYS: ${S.keys.filter(Boolean).map(k=>`🔑 <b>${k}</b>`).join(' &nbsp; ')}</div><div class="rank">TITLE: ${rank}</div>`;
+  show('end');sfx.ok();
+}
+
+/* ===== LEVELS: mỗi level là một object độc lập =====
+   {key, name, time(giây), alertTitle, alert[], hint(step), start(stageEl)}
+   Trong start() dùng L (trạng thái màn) và api.wrong(msg) / api.done(title, html). */
+const LEVELS=[];
+
+/* ---- LEVEL 2: PHISHING STORM ---- */
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const H=(k,t,c='')=>`<span class="hot ${c}" data-k="${k}" tabindex="0" role="button">${t}</span>`;
+
+/* Mỗi case: một email giả. clues: [ok(1=dấu hiệu thật), tiêu đề ngắn, giải thích]. need: số dấu hiệu cần tìm để mở bước chọn cách xử lý. */
+const CASES=[
+{ prompt:'Hộp thư nhận được một email tự xưng là <b>ngân hàng</b>. Hãy bấm vào các chi tiết gạch vàng, tìm đủ <b>3 dấu hiệu đáng ngờ</b> rồi chọn cách xử lý.',
+  from:H('dom','VietSecure Bank &lt;support@vietsecure-bank-help.top&gt;'),to:'ban@email.com',subject:'[KHẨN] Tài khoản của bạn sẽ bị khóa sau 30 phút',
+  body:[H('logo','▣ VietSecure Bank · Ngân hàng số an toàn'),H('greet','Kính gửi quý khách,'),
+    'Hệ thống phát hiện hoạt động đăng nhập bất thường. '+H('urg','Nếu không xác minh trong 30 phút, tài khoản sẽ bị khóa vĩnh viễn.'),
+    H('link','XÁC MINH NGAY','btn-fake'),'Hotline '+H('hot','1900 5555')+' · © 2026 VietSecure Bank'],
+  need:3,
+  clues:{dom:[1,'Tên miền lạ','Địa chỉ gửi là <b>vietsecure-bank-help.top</b>, không phải tên miền chính thức của ngân hàng. Kẻ gian hay thêm “help”, “support” vào tên miền.'],
+    greet:[1,'Lời chào chung chung','Ngân hàng thật thường gọi đúng tên bạn. “Quý khách” dùng để gửi hàng loạt.'],
+    urg:[1,'Gây áp lực thời gian','Hạn 30 phút và đe dọa khóa vĩnh viễn nhằm khiến bạn bấm trước khi kịp suy nghĩ.'],
+    link:[1,'Liên kết giả','Liên kết thực sự trỏ tới <b>http://vietsecure-login.top/verify</b>, không phải trang chính thức.'],
+    logo:[0,'Logo và màu sắc','Logo rất dễ sao chép, nên có logo không chứng minh thư là thật.'],
+    hot:[0,'Số hotline','Số điện thoại cuối thư cũng có thể bịa. Hãy dùng số in trên thẻ hoặc trên trang chính thức bạn tự tìm.']},
+  opts:[{t:'Bấm XÁC MINH NGAY để kịp giữ tài khoản',why:'Liên kết dẫn tới trang giả để lấy mật khẩu và mã OTP. Sự gấp gáp chính là mồi nhử.'},
+    {t:'Trả lời thư để hỏi xem có đúng là ngân hàng không',why:'Người nhận thư trả lời chính là kẻ lừa đảo. Bạn chỉ xác nhận email của mình đang hoạt động.'},
+    {t:'Không bấm gì. Tự mở app ngân hàng hoặc gọi số in trên thẻ để kiểm tra, rồi báo cáo thư lừa đảo',ok:1},
+    {t:'Chuyển tiếp thư cho bạn bè hỏi xem có thật không',why:'Chuyển tiếp có thể khiến người khác bấm nhầm liên kết. Hãy báo cáo thư thay vì chia sẻ.'}],
+  hint:['Xem kỹ địa chỉ người gửi, lời chào và hạn chót. Đừng tin logo hay số hotline trong thư vì chúng rất dễ làm giả.','Không dùng bất kỳ liên kết hay số điện thoại nào trong thư. Hãy tự mở kênh chính thức mà bạn đã biết.'],
+  done:{title:'CASE 1 CLEARED',html:()=>`<p>Đây là thư <b>phishing giả danh ngân hàng</b>:</p><ul><li><b>Tên miền lạ</b> và <b>liên kết dẫn tới trang giả</b>.</li><li><b>Lời chào chung chung</b>, gửi hàng loạt.</li><li><b>Đe dọa khóa tài khoản trong 30 phút</b> để bạn không kịp kiểm tra.</li></ul><p><b>Ghi nhớ:</b> ngân hàng thật không yêu cầu xác minh qua liên kết trong email. Hãy tự mở app hoặc website chính thức.</p>`}},
+
+{ prompt:'Email báo có <b>kiện hàng chờ giao</b>, dù bạn không nhớ đã đặt gì. Tìm đủ <b>3 dấu hiệu đáng ngờ</b> rồi chọn cách xử lý.',
+  from:H('dom','GHN Express &lt;delivery@ghn-express-vn.xyz&gt;'),to:'ban@email.com',subject:'Kiện hàng #VN882041 chưa thể giao: cần thanh toán phí',
+  body:['Xin chào '+H('name','Nguyễn An')+',','Kiện hàng '+H('ord','#VN882041')+' đang giữ tại kho. '+H('unk','Người gửi: ẩn danh. Nội dung: “quà tặng từ người quen”.'),
+    H('link','THANH TOÁN 15.000đ PHÍ GIAO','btn-fake'),H('ddl','Nếu không thanh toán trong 24 giờ, kiện hàng sẽ bị hoàn về và hủy.')],
+  need:3,
+  clues:{dom:[1,'Tên miền lạ','Đuôi <b>.xyz</b> và tên miền không thuộc hãng vận chuyển. Hãng thật dùng tên miền chính thức của họ.'],
+    unk:[1,'Không rõ người gửi','Đơn hàng bạn không đặt, người gửi ẩn danh. Kẻ gian dùng sự tò mò để dụ bạn bấm.'],
+    link:[1,'Đòi trả phí qua liên kết','Liên kết thực sự trỏ tới <b>http://ghn-nhanhang.top/pay</b>, trang thu thập số thẻ và mã OTP. Phí nhỏ chỉ là cái cớ.'],
+    ddl:[1,'Hạn 24 giờ','Hạn chót khiến bạn không kịp kiểm tra đơn hàng.'],
+    name:[0,'Có tên bạn','Tên bạn xuất hiện nhưng thông tin này kẻ gian dễ có từ dữ liệu bị rò rỉ, nên không chứng minh thư là thật.'],
+    ord:[0,'Mã vận đơn','Mã nhìn rất thật nhưng ai cũng có thể bịa ra một dãy số.']},
+  opts:[{t:'Thanh toán 15.000đ vì số tiền nhỏ',why:'Trang thanh toán giả sẽ lấy số thẻ và OTP của bạn. Số tiền nhỏ chỉ là cái cớ.'},
+    {t:'Bấm vào liên kết chỉ để xem thử, không nhập gì',why:'Chỉ mở liên kết cũng có thể dẫn tới trang độc hại hoặc xác nhận email của bạn đang hoạt động.'},
+    {t:'Tự mở app mua sắm hoặc hãng vận chuyển chính thức để kiểm tra đơn. Nếu không có đơn thì xóa thư',ok:1},
+    {t:'Trả lời “STOP” để ngừng nhận thư',why:'Thư lừa đảo không có cơ chế hủy thật. Trả lời chỉ xác nhận tài khoản của bạn còn hoạt động.'}],
+  hint:['Hãy tự hỏi: bạn có đặt hàng không, người gửi là ai, và vì sao phải trả tiền qua một liên kết?','Cách an toàn nhất là kiểm tra đơn hàng ở kênh bạn tự mở, không đi qua liên kết trong thư.'],
+  done:{title:'CASE 2 CLEARED',html:()=>`<p>Đây là thư <b>giả mạo giao hàng</b>:</p><ul><li><b>Đơn hàng bạn không đặt</b>, người gửi ẩn danh.</li><li><b>Đòi phí nhỏ qua liên kết</b> để lấy thông tin thẻ.</li><li><b>Hạn 24 giờ</b> tạo áp lực phải làm ngay.</li></ul><p><b>Ghi nhớ:</b> có tên bạn hay mã vận đơn trong thư không có nghĩa là thật. Hãy kiểm tra trong app chính thức.</p>`}},
+
+{ prompt:'Một email từ <b>thầy hiệu trưởng</b> nhờ bạn việc gấp. Email thật của trường có đuôi <b>@thptcyberverse.edu.vn</b>. Tìm đủ <b>3 dấu hiệu đáng ngờ</b> rồi chọn cách xử lý.',
+  from:H('dom','Thầy Nguyễn Văn Long (Hiệu trưởng) &lt;hieutruong.nvlong@gmail.com&gt;'),to:'ban@email.com',subject:'Nhờ em một việc gấp, đừng nói với ai',
+  body:[H('greet','Chào em,')+' thầy đang họp nên '+H('nocall','không thể gọi điện')+', em nhắn lại qua email giúp thầy.',
+    'Thầy cần mua '+H('gift','5 thẻ quà tặng, mỗi thẻ 500.000đ')+' cho đoàn khách. Em ứng trước, chụp mã thẻ gửi lại, '+H('secret','thầy hoàn tiền ngay chiều nay, đừng nói với ai.'),
+    'Cảm ơn em. '+H('sig','Nguyễn Văn Long · Hiệu trưởng THPT Cyberverse')],
+  need:3,
+  clues:{dom:[1,'Email cá nhân, không phải của trường','Địa chỉ là <b>@gmail.com</b>, không phải <b>@thptcyberverse.edu.vn</b>. Tên hiển thị có thể ghi bất cứ gì.'],
+    nocall:[1,'Ngăn bạn xác minh','Nói “không thể gọi điện” để bạn không thể kiểm tra qua kênh khác.'],
+    gift:[1,'Đòi mã thẻ quà tặng','Mã thẻ gửi đi gần như không thể thu hồi, nên đây là cách thu tiền quen thuộc của kẻ lừa đảo.'],
+    secret:[1,'Gấp và giữ bí mật','“Đừng nói với ai” nhằm cô lập bạn khỏi những người có thể phát hiện ra.'],
+    greet:[0,'Giọng thân mật','Giọng điệu thân mật dễ bắt chước, nên không chứng minh gì.'],
+    sig:[0,'Chữ ký có tên trường','Chữ ký chỉ là chữ, ai cũng có thể sao chép.']},
+  opts:[{t:'Mua thẻ và gửi mã vì đây là yêu cầu của thầy',why:'Đây là chiêu giả mạo lãnh đạo. Mã thẻ đã gửi gần như không thể lấy lại.'},
+    {t:'Trả lời email hỏi lại thầy xem có đúng không',why:'Thư trả lời sẽ về hộp thư của kẻ giả mạo, và hắn sẽ khẳng định mình là thầy thật.'},
+    {t:'Liên hệ thầy hoặc văn phòng trường bằng số điện thoại đã biết hoặc gặp trực tiếp, đồng thời báo cho nhà trường',ok:1},
+    {t:'Nhờ bạn cùng lớp góp tiền mua thẻ cho nhanh',why:'Làm vậy chỉ kéo thêm người bị mất tiền.'}],
+  hint:['So sánh đuôi email với địa chỉ thật của trường và xem thư đang yêu cầu gì, ngăn bạn làm gì.','Xác minh bằng một kênh độc lập bạn đã biết từ trước, không phải bằng cách trả lời thư.'],
+  done:{title:'CASE 3 CLEARED',html:()=>`<p>Đây là thư <b>giả mạo người có thẩm quyền</b>:</p><ul><li><b>Email cá nhân</b> thay vì email chính thức của trường.</li><li><b>Không cho gọi điện</b>, <b>giữ bí mật</b> và <b>đòi mã thẻ quà tặng</b>.</li></ul><p><b>Ghi nhớ:</b> yêu cầu tiền bạc “gấp và bí mật” luôn cần được xác minh trực tiếp, kể cả khi người gửi là thầy cô hay sếp.</p>`}},
+
+{ prompt:'Thư báo bạn <b>trúng học bổng</b> kèm tệp đính kèm, dù bạn chưa từng đăng ký. Tìm đủ <b>3 dấu hiệu đáng ngờ</b> rồi chọn cách xử lý.',
+  from:H('dom','Quỹ Học bổng Tương Lai &lt;hocbong@quytuonglai-vn.top&gt;'),to:'ban@email.com',subject:'Chúc mừng! Bạn trúng học bổng 50.000.000đ',
+  body:['Chúc mừng! Bạn đã được chọn, '+H('noapply','dù bạn chưa nộp hồ sơ nào.'),
+    'Mở tệp để nhận thưởng: '+H('file','HocBong_2026.pdf.exe','btn-fake'),
+    H('macro','Nếu có cảnh báo, hãy tắt phần mềm diệt virus và bấm “Enable Content”.'),H('addr','Quỹ Học bổng Tương Lai · 12 Nguyễn Huệ · MST 0312345678')],
+  need:3,
+  clues:{dom:[1,'Tên miền lạ','Đuôi <b>.top</b> và tên miền không thuộc quỹ nào có thông tin kiểm chứng được.'],
+    noapply:[1,'Trúng thưởng dù không đăng ký','Phần thưởng lớn bất ngờ là mồi nhử để bạn mở tệp.'],
+    file:[1,'Đuôi tệp giả','Tên “.pdf.exe” giấu đuôi <b>.exe</b>, một chương trình chạy được trên máy, không phải tài liệu PDF.'],
+    macro:[1,'Bảo tắt diệt virus','Không tổ chức thật nào yêu cầu bạn tắt phần mềm bảo vệ. Đây là cách cài mã độc.'],
+    addr:[0,'Địa chỉ và mã số thuế','Địa chỉ và mã số thuế chỉ là chữ, kẻ gian có thể sao chép từ một tổ chức thật.']},
+  opts:[{t:'Mở tệp để xem thử, tắt diệt virus theo hướng dẫn',why:'Đây chính là cách cài mã độc. Không bao giờ tắt phần mềm bảo vệ theo yêu cầu từ email.'},
+    {t:'Mở tệp trên máy tính cũ ở nhà để đỡ rủi ro',why:'Mã độc vẫn lấy được dữ liệu trên máy đó và có thể lây sang các thiết bị trong cùng mạng.'},
+    {t:'Không mở tệp. Báo giáo viên hoặc bộ phận IT và tra cứu học bổng trên website chính thức của quỹ',ok:1},
+    {t:'Gửi tệp cho bạn thân nhờ mở thử',why:'Bạn sẽ đưa mã độc cho người khác. Hãy báo cáo thay vì chia sẻ.'}],
+  hint:['Nhìn kỹ tên tệp đính kèm và những gì thư yêu cầu bạn làm với máy tính.','Đừng mở tệp lạ trên bất kỳ máy nào. Hãy hỏi người có chuyên môn và tự tra cứu thông tin ở nguồn chính thức.'],
+  done:{title:'CASE 4 CLEARED',html:()=>`<p>Đây là thư <b>phát tán mã độc</b>:</p><ul><li><b>Trúng thưởng không đăng ký</b>, mồi nhử hấp dẫn.</li><li><b>Tệp “.pdf.exe”</b> thực chất là chương trình chạy trên máy.</li><li><b>Yêu cầu tắt diệt virus</b> để mã độc không bị chặn.</li></ul><p><b>Ghi nhớ:</b> chỉ mở tệp từ nguồn bạn tin cậy và luôn kiểm tra đuôi tệp thật.</p>`}}
+];
+
+LEVELS.push({
+  key:'SECURITY KEY 02',name:'LEVEL 02 · PHISHING STORM',time:600,
+  alertTitle:'SYSTEM ALERT',
+  alert:['<b>Phishing storm detected.</b>','Malicious emails are flooding the Mail Gateway.','Your mission: Analyze 4 suspicious emails, find the red flags and choose the safe response.'],
+  hint:step=>CASES[L.c].hint[step]||CASES[L.c].hint[0],
+  start(st){
+    L.c=0;
+    const run=()=>{
+      const C=CASES[L.c];L.step=0;L.found=new Set();L.opts=shuffle(C.opts);
+      st.innerHTML=`<div class="prompt"><b>CASE ${L.c+1}/${CASES.length}</b> · ${C.prompt}</div>
+        <div class="mail-wrap"><div class="mail"><div class="mail-bar"><i></i><i></i><i></i>&nbsp;INBOX · THƯ MỚI</div>
+        <div class="mail-head"><div>Từ: ${C.from}</div><div>Đến: ${C.to}</div><div>Chủ đề: <b style="font-weight:400;color:var(--bright)">${C.subject}</b></div></div>
+        <div class="mail-body">${C.body.map(p=>`<div>${p}</div>`).join('')}</div></div>
+        <aside class="panel" style="margin-top:0"><h3>Phân tích thư</h3><div id="cnt" class="small">Dấu hiệu đã tìm: 0/${C.need}</div><div id="info" class="info">Bấm vào các chi tiết gạch vàng để kiểm tra.</div><div id="chips"></div></aside></div>
+        <div id="act" class="panel" hidden><h3>Bạn sẽ xử lý thế nào?</h3><div id="opts">${L.opts.map((o,i)=>`<button class="opt" data-i="${i}">${o.t}</button>`).join('')}</div></div>`;
+      st.scrollTop=0;$('#stage').parentElement.scrollTop=0;hud();
+    };
+    st.onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('hot')){e.preventDefault();e.target.click()}};
+    st.onclick=e=>{
+      const C=CASES[L.c],h=e.target.closest('.hot'),o=e.target.closest('.opt');
+      if(h){
+        sfx.click();const k=h.dataset.k,c=C.clues[k];
+        $('#info').innerHTML=`<b>${c[1]}</b>${c[0]?'':' · <span style="color:var(--meta)">không phải dấu hiệu</span>'}<br>${c[2]}`;
+        if(c[0]&&!L.found.has(k)){
+          L.found.add(k);h.classList.add('found');sfx.ok();
+          $('#chips').insertAdjacentHTML('beforeend',`<span class="chip">${c[1]}</span>`);
+          $('#cnt').textContent=`Dấu hiệu đã tìm: ${L.found.size}/${C.need}`;
+          if(L.found.size>=C.need&&L.step===0){L.step=1;$('#act').hidden=false;toast('Đủ bằng chứng. Hãy chọn cách xử lý');$('#act').scrollIntoView({behavior:'smooth'})}
+        }
+      }
+      if(o&&L.step===1){
+        sfx.click();const p=L.opts[+o.dataset.i];
+        if(!p.ok)return api.wrong(p.why);
+        if(L.c===CASES.length-1)return api.done(C.done.title,C.done.html());
+        sfx.ok();
+        modal({cls:'ok',title:C.done.title,sub:`CASE ${L.c+1}/${CASES.length} · tiếp tục để mở khóa Security Key`,html:C.done.html(),buttons:[{label:'NEXT CASE',fn:()=>{L.c++;run()}}]});
+      }
+    };
+    run();
+  }
+});
+
+/* ===== Gắn sự kiện & khởi động ===== */
+$('#initBtn').onclick=()=>{sfx.click();boot()};
+$('#contBtn').onclick=()=>{sfx.click();S.done||S.level>=LEVELS.length?endGame():startLevel(S.level)};
+$('#storyGo').onclick=()=>{sfx.click();startLevel(0)};
+$('#story').addEventListener('click',()=>{skip=true});
+$('#replayBtn').onclick=()=>{sfx.click();S={...fresh(),muted:S.muted};save();startLevel(0)};
+$('#nextBtn').onclick=()=>{sfx.click();location.href='/levels/level3.html'};
+$('#muteBtn').onclick=()=>{S.muted=!S.muted;save();$('#muteBtn').textContent=S.muted?'🔇':'🔊'};
+$('#muteBtn').textContent=S.muted?'🔇':'🔊';
+if(S.done||S.scores.some(Boolean)){const b=$('#contBtn');b.hidden=false;b.textContent=S.done?'VIEW RESULT':'CONTINUE'}
+hud();
+
+</script>
+<script src="/shared/cv-nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/level/1", "destination": "/levels/level1.html" },
+    { "source": "/level/2", "destination": "/levels/level2.html" },
+    { "source": "/level/3", "destination": "/levels/level3.html" },
+    { "source": "/level/4", "destination": "/levels/level4.html" },
+    { "source": "/level/5", "destination": "/levels/level5.html" }
+  ]
+}

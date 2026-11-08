@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CYBERVERSE – LEVEL 4: FINAL FIREWALL</title>
+<style>
+@font-face{font-family:"Financial Plex Sans";src:local("IBM Plex Sans"),local("IBMPlexSans-Regular"),local("Inter-Regular");font-weight:300 700}
+@font-face{font-family:"Financial Plex Mono";src:local("IBM Plex Mono"),local("IBMPlexMono-Regular"),local("JetBrainsMono-Regular");font-weight:300 700}
+:root{
+/* FINANCIAL DESIGN SYSTEM — authoritative tokens */
+--dp-color-ground:#050505;--dp-color-ground-tint:#141414;--dp-color-panel:#0e0e0e;--dp-color-accent:#3fd6c6;--dp-color-value:#f2f2f2;--dp-color-ink:#f2f2f2;--dp-color-ink-muted:#a6a9ad;--dp-color-line:#222222;
+--dp-typography-body-face:"Financial Plex Sans",sans-serif;--dp-typography-data-face:"Financial Plex Mono",monospace;
+--dp-typography-body:16px;--dp-typography-supporting:14px;--dp-typography-metadata:13px;--dp-typography-body-leading:1.6;--dp-typography-reading-leading:1.65;
+--dp-spacing-cluster-gap:24px;--dp-spacing-compact-gap:12px;
+--dp-radius-panel:6px;--dp-radius-editorial:4px;--dp-radius-pill:999px;
+--dp-border-hairline:1px;
+--dp-motion-duration:120ms;--dp-motion-ease:ease-out;--dp-motion-interaction:var(--dp-motion-duration);--dp-motion-easing:var(--dp-motion-ease);--dp-motion-normal:280ms;--dp-motion-easing-out:cubic-bezier(.16,1,.3,1);
+/* supporting blur tiers for modal/floating layers */
+--dp-blur-subtle:2px;--dp-blur-medium:5px;--dp-blur-overlay:10px;
+/* semantic colors (required by existing game states, tuned to the palette) */
+--dp-color-success:#3fd6c6;--dp-color-warning:#e0a33e;--dp-color-danger:#e25c5c;--dp-color-neutral:var(--dp-color-dim);--dp-color-dim:#96999d;--dp-color-inverse-ink:#0a0a0a;
+/* project aliases resolve to the authoritative tokens (single source of truth) */
+--cv-color-background:var(--dp-color-ground);--cv-color-background-secondary:var(--dp-color-ground-tint);--cv-color-panel:var(--dp-color-panel);--cv-color-panel-hover:#161616;--cv-color-accent:var(--dp-color-accent);--cv-color-value:var(--dp-color-value);--cv-color-success:var(--dp-color-success);--cv-color-warning:var(--dp-color-warning);--cv-color-danger:var(--dp-color-danger);--cv-color-text:var(--dp-color-ink);--cv-color-text-muted:var(--dp-color-ink-muted);--cv-color-border:var(--dp-color-line);
+--cv-font-display:"Financial Plex Sans","IBM Plex Sans",Inter,"Segoe UI",sans-serif;--cv-font-body:"Financial Plex Sans","IBM Plex Sans",Inter,"Segoe UI",sans-serif;--cv-font-mono:"Financial Plex Mono","IBM Plex Mono",Consolas,Menlo,monospace;
+--cv-font-size-body:var(--dp-typography-body);--cv-font-size-small:var(--dp-typography-supporting);--cv-font-size-metadata:var(--dp-typography-metadata);--cv-line-height-body:var(--dp-typography-body-leading);--cv-radius-panel:var(--dp-radius-panel);--cv-radius-card:var(--dp-radius-panel);--cv-radius-control:var(--dp-radius-pill);
+--dp-motion-fast:var(--dp-motion-interaction);--dp-motion-slow:var(--dp-motion-normal);
+--cv-motion-fast:var(--dp-motion-fast);--cv-motion-normal:var(--dp-motion-normal);--cv-motion-screen:var(--dp-motion-slow);--cv-motion-easing:var(--dp-motion-easing);--cv-ease-enter:var(--dp-motion-easing-out);--cv-ease-exit:ease;--cv-blur-subtle:var(--dp-blur-subtle);--cv-blur-overlay:var(--dp-blur-overlay);--cv-shadow-glow:0 0 24px rgba(63,214,198,.10);
+/* legacy names kept for existing markup */
+--dp-color-ink-secondary:var(--dp-color-ink-muted);--dp-color-ground-muted:var(--dp-color-ground-tint);--dp-color-rule:var(--dp-color-line);--dp-color-on-accent:#0a0a0a;
+--dp-color-meta:#8a8d91;--dp-color-live:var(--dp-color-success);--dp-color-hairline:var(--dp-color-line);--dp-color-hairline-2:#303030;--dp-color-read:var(--dp-color-ink-muted);--dp-color-bright:var(--dp-color-ink);
+--dp-gap:var(--dp-spacing-cluster-gap);--g:var(--dp-color-success);--w:var(--dp-color-warning);--d:var(--dp-color-danger);--s:var(--dp-color-ink-muted)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%}::selection{background:rgba(63,214,198,.30);color:#fff}html{scrollbar-width:thin;scrollbar-color:#222222 transparent}::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#262626;border-radius:999px;border:2px solid transparent;background-clip:padding-box}::-webkit-scrollbar-track{background:transparent}
+body{background:var(--cv-color-background);color:var(--cv-color-text);font-family:var(--cv-font-body);font-size:var(--cv-font-size-body);line-height:var(--cv-line-height-body);position:relative}
+#app{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:24px 32px}
+.panel{background:var(--cv-color-panel);border:1px solid var(--cv-color-border);border-radius:var(--cv-radius-panel);box-shadow:0 8px 24px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.03);padding:22px;margin-bottom:var(--dp-gap)}
+h1,h2,h3{font-family:var(--cv-font-display);font-weight:600;letter-spacing:-.02em;line-height:1.15;margin:.3em 0;color:var(--cv-color-text)}
+h1{font-size:clamp(32px,5vw,42px);letter-spacing:-.03em}h2{font-size:clamp(20px,2.4vw,24px);font-weight:500}h3{font-size:18px;font-weight:500;line-height:1.25}
+.hero{display:grid;grid-template-columns:1.45fr 1fr;gap:var(--dp-gap);align-items:center;padding-top:6vh}
+.hero h1{font-size:clamp(40px,6vw,64px);line-height:1.05;letter-spacing:-.035em;background:linear-gradient(115deg,var(--cv-color-text) 45%,var(--cv-color-value) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.hero .sub:first-child{font-family:var(--cv-font-mono);font-size:var(--cv-font-size-metadata);letter-spacing:.16em;text-transform:uppercase;color:var(--cv-color-accent)}
+.hero svg{width:100%;height:auto;max-width:420px;display:block}
+.hero .frame{position:relative;z-index:0;background:var(--cv-color-panel);border:1px solid var(--cv-color-border);border-radius:var(--cv-radius-panel);padding:18px;display:flex;align-items:center;justify-content:center}
+.hero .frame::after{content:"";position:absolute;inset:9px -9px -9px 9px;z-index:-1;pointer-events:none;border:1px solid var(--dp-color-line);border-radius:var(--dp-radius-panel)}
+.center{text-align:left;max-width:900px}.sub{color:var(--cv-color-text-muted);font-size:var(--cv-font-size-body)}
+button{font:inherit;font-size:var(--cv-font-size-body);font-weight:600;cursor:pointer;background:var(--cv-color-panel);color:var(--cv-color-text);border:1px solid var(--cv-color-border);border-radius:var(--cv-radius-control);padding:10px 22px;min-height:40px;transition:background-color var(--dp-motion-interaction) var(--dp-motion-easing),border-color var(--dp-motion-interaction) var(--dp-motion-easing),color var(--dp-motion-interaction) var(--dp-motion-easing),transform var(--dp-motion-interaction) var(--dp-motion-easing),box-shadow var(--dp-motion-interaction) var(--dp-motion-easing)}
+button:hover:not(:disabled){background:var(--cv-color-panel-hover);border-color:rgba(63,214,198,.55)}
+button:active:not(:disabled){transform:scale(.98)}button:disabled{opacity:.4;cursor:not-allowed}
+button.g{background:var(--dp-color-bright);color:var(--dp-color-inverse-ink);border-color:var(--dp-color-bright)}
+button.g:hover:not(:disabled){background:#ffffff;border-color:#ffffff}
+button.g:not(.opt)::after{content:"→"/"";display:inline-block;margin-left:8px;transition:transform var(--cv-motion-fast) var(--cv-motion-easing)}button.g:hover:not(:disabled)::after{transform:translateX(4px)}
+button.w{color:var(--cv-color-text-muted)}
+button:focus-visible,input:focus-visible,.chip:focus-visible,.nd:focus-visible{outline:2px solid var(--cv-color-accent);outline-offset:3px}
+.panel.hud{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;background:var(--cv-color-background-secondary);font-size:var(--cv-font-size-small);color:var(--cv-color-text-muted);box-shadow:none}
+.hud b{color:var(--cv-color-value);font-family:var(--cv-font-mono);font-weight:500;font-variant-numeric:tabular-nums}.hud b:first-child{color:var(--cv-color-text);font-family:var(--cv-font-display);letter-spacing:.06em}
+.hud button{background:transparent;color:var(--cv-color-text);border-color:var(--cv-color-border);min-height:36px}
+.btn-sm{min-height:34px;padding:6px 14px;font-size:var(--cv-font-size-small)}
+.hud>div{display:flex;align-items:center;gap:11px;flex-wrap:wrap;min-width:0}
+.hud-id{font-family:var(--cv-font-mono);font-size:var(--cv-font-size-metadata);letter-spacing:.08em;color:var(--dp-color-meta);white-space:nowrap}
+.hud .sep{width:1px;height:14px;background:var(--cv-color-border);flex:none}
+.hud .kpi{display:inline-flex;align-items:center;gap:6px;font-family:var(--cv-font-mono);font-size:var(--cv-font-size-metadata);letter-spacing:.06em;color:var(--dp-color-meta);white-space:nowrap}
+.hud .kpi svg{width:12px;height:12px;opacity:.85}
+.bar{height:6px;background:var(--dp-color-ground);border-radius:999px;overflow:hidden}.bar i{display:block;height:100%;background:var(--dp-color-accent);border-radius:999px;transform-origin:0 50%;transition:width var(--cv-motion-screen) var(--cv-motion-easing),transform var(--cv-motion-screen) var(--cv-motion-easing)}
+.mono{font-family:var(--cv-font-mono);font-size:clamp(20px,3vw,28px);letter-spacing:.12em;color:var(--cv-color-value);font-variant-numeric:tabular-nums;background:var(--dp-color-ground);border:1px solid var(--cv-color-border);border-radius:var(--dp-radius-editorial);padding:12px;word-break:break-word}
+input[type=text]{width:100%;max-width:420px;background:var(--dp-color-ground);border:1px solid var(--dp-color-hairline-2);color:var(--cv-color-text);padding:10px 12px;border-radius:var(--dp-radius-editorial);font-family:var(--cv-font-mono);font-size:18px;text-transform:uppercase;caret-color:var(--cv-color-accent);transition:border-color var(--cv-motion-fast) var(--cv-motion-easing),box-shadow var(--cv-motion-normal) var(--cv-motion-easing)}
+input[type=text]:hover{border-color:#464646}input[type=text]:focus{border-color:var(--cv-color-accent);box-shadow:var(--cv-shadow-glow)}input[type=range]{width:100%;accent-color:var(--cv-color-accent)}
+label[for=ans]{display:block;font-family:var(--cv-font-mono);font-size:var(--cv-font-size-metadata);letter-spacing:.08em;text-transform:uppercase;color:var(--dp-color-meta);margin-bottom:6px}
+.fb{border-left:3px solid;padding:10px 16px;margin-top:14px;background:var(--cv-color-background-secondary);border-radius:0 var(--dp-radius-editorial) var(--dp-radius-editorial) 0;animation:fade var(--cv-motion-normal) var(--cv-ease-enter)}
+.ok{border-color:var(--g);background:linear-gradient(90deg,rgba(63,214,198,.06),transparent 60%),var(--cv-color-background-secondary)}.ok h3{color:var(--g)}.no{border-color:var(--w);background:linear-gradient(90deg,rgba(224,163,62,.07),transparent 60%),var(--cv-color-background-secondary)}.no h3{color:var(--w)}
+.fi{width:1.05em;height:1.05em;vertical-align:-.16em;margin-right:7px;flex:none}
+.fb h3 .fi{width:1.1em;height:1.1em;vertical-align:-.19em;margin-right:9px}
+.grid2{display:grid;grid-template-columns:1fr 2fr;gap:var(--dp-gap)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--dp-gap)}
+.cards>.panel{transition:transform var(--cv-motion-normal) var(--cv-motion-easing),border-color var(--cv-motion-normal) var(--cv-motion-easing),box-shadow var(--cv-motion-normal) var(--cv-motion-easing)}
+.cards>.panel:not(.lock):hover{border-color:rgba(63,214,198,.5);box-shadow:var(--cv-shadow-glow),0 14px 32px rgba(0,0,0,.35)}
+.lock{background:var(--cv-color-background-secondary);box-shadow:none}.lock h2{color:var(--cv-color-text-muted)}
+.chips{display:flex;flex-wrap:wrap;gap:var(--dp-spacing-compact-gap);margin:10px 0}
+.chip{border:1px solid var(--dp-color-hairline-2);border-radius:var(--cv-radius-control);padding:8px 10px;font-family:var(--cv-font-mono);font-size:var(--cv-font-size-small);cursor:pointer;text-align:center;min-width:104px;background:var(--dp-color-ground);transition:border-color var(--dp-motion-interaction) var(--dp-motion-easing),background var(--dp-motion-interaction) var(--dp-motion-easing),transform var(--dp-motion-interaction) var(--dp-motion-easing)}
+.chip:hover{border-color:var(--cv-color-accent)}.chip:active{transform:scale(.97)}.chip.done{border-color:var(--g);color:var(--g);background:rgba(63,214,198,.10)}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;white-space:normal;font-weight:500;min-height:44px;padding-right:16px}.opt::after{content:none!important}
+.opt.sel{background:rgba(63,214,198,.10);border-color:var(--cv-color-accent);color:var(--cv-color-text);box-shadow:inset 3px 0 0 var(--cv-color-accent)}
+.node{display:inline-block;border:1px solid var(--cv-color-border);border-radius:var(--cv-radius-control);padding:6px 12px;margin:4px 4px 4px 0;font-family:var(--cv-font-mono);font-size:var(--cv-font-size-metadata);letter-spacing:.04em;color:var(--dp-color-meta);background:var(--dp-color-ground);transition:border-color var(--cv-motion-normal),color var(--cv-motion-normal)}.node.on{border-color:var(--g);color:var(--g)}
+.inc{padding:6px 10px;border-radius:var(--cv-radius-control);margin:4px 0;border:1px solid var(--cv-color-border);color:var(--cv-color-text-muted);font-size:var(--cv-font-size-small);transition:border-color var(--dp-motion-normal) var(--dp-motion-easing),background var(--dp-motion-normal) var(--dp-motion-easing),color var(--dp-motion-normal) var(--dp-motion-easing)}.inc.ok2{border-color:rgba(63,214,198,.55);color:var(--g);background:rgba(63,214,198,.08)}.inc .fi{width:.95em;height:.95em;margin-right:6px}
+.ov{position:fixed;inset:0;background:rgba(3,3,3,.8);-webkit-backdrop-filter:blur(var(--dp-blur-overlay));backdrop-filter:blur(var(--dp-blur-overlay));display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9;text-align:center;padding:24px;color:var(--cv-color-text);animation:fade var(--cv-motion-normal) var(--cv-ease-enter)}
+.ov.exiting{animation:none;opacity:0;pointer-events:none;transition:opacity var(--dp-motion-fast) var(--dp-motion-easing)}
+.ov h1{font-size:clamp(28px,5vw,48px)}.ov>.sub{color:var(--cv-color-text-muted)}.ov>.bar{width:260px}.ov>.bar i{transition:width 650ms linear}.ov .panel{color:var(--cv-color-text);text-align:left;animation:rise var(--cv-motion-screen) var(--cv-ease-enter) both}
+.pop{position:fixed;right:20px;top:20px;background:rgba(14,14,14,.92);-webkit-backdrop-filter:blur(var(--dp-blur-medium));backdrop-filter:blur(var(--dp-blur-medium));border:1px solid rgba(242,242,242,.35);color:var(--cv-color-value);font-family:var(--cv-font-mono);padding:8px 16px;border-radius:var(--cv-radius-control);font-size:var(--cv-font-size-small);z-index:10;box-shadow:var(--cv-shadow-glow);animation:fade var(--cv-motion-normal) var(--cv-ease-enter)}
+.pop.out{opacity:0;transform:translateY(-6px);filter:blur(var(--dp-blur-subtle));transition:opacity var(--dp-motion-fast) var(--dp-motion-easing),transform var(--dp-motion-fast) var(--dp-motion-easing),filter var(--dp-motion-fast) var(--dp-motion-easing)}
+.pop.big{max-width:340px;line-height:1.5;font-family:var(--cv-font-body);color:var(--cv-color-text)}
+.key{display:inline-block;border:1px solid rgba(242,242,242,.35);color:var(--cv-color-value);padding:0 10px;border-radius:999px;margin-left:4px;font-size:var(--cv-font-size-metadata);letter-spacing:.06em;transition:color var(--cv-motion-normal),border-color var(--cv-motion-normal)}.key.off{color:var(--dp-color-meta);border-color:var(--cv-color-border)}.key .fi{width:11px;height:11px;margin-right:5px}
+pre{white-space:pre-wrap;font-family:var(--cv-font-mono);font-size:var(--cv-font-size-small);line-height:1.7;color:var(--cv-color-text);background:var(--dp-color-ground);border:1px solid var(--cv-color-border);border-left:3px solid var(--dp-color-value);border-radius:var(--dp-radius-editorial);padding:12px;margin:8px 0}
+.g2b{display:grid;grid-template-columns:1fr 1fr;gap:var(--dp-gap)}
+.scr{overflow-x:auto}.lrow{min-width:560px;margin:6px 0}.lrow>span{display:block;color:var(--dp-color-read);font-size:var(--cv-font-size-small);margin-bottom:4px}
+.top,.strip{display:grid;font-family:var(--cv-font-mono);text-align:center}.top{grid-template-columns:repeat(26,1fr)}.strip{grid-template-columns:repeat(78,1fr);width:300%;transition:transform var(--cv-motion-screen) var(--cv-motion-easing)}
+.win{overflow:hidden;width:100%}.top i,.strip i{font-style:normal;padding:6px 0;border:1px solid var(--cv-color-border);font-size:var(--cv-font-size-small);color:var(--dp-color-meta);transition:color var(--cv-motion-normal),background var(--cv-motion-normal),box-shadow var(--cv-motion-normal)}
+.top i{background:var(--dp-color-ground-tint)}.strip i{background:var(--dp-color-ground)}
+.top i.hl,.strip i.hl{color:var(--dp-color-on-accent);background:var(--cv-color-accent)}
+.wt{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;max-width:520px;text-align:center;font-family:var(--cv-font-mono);margin:8px 0}.wt div{border:1px solid var(--dp-color-hairline-2);border-radius:var(--dp-radius-editorial);padding:6px 0;animation:fade var(--cv-motion-normal) var(--cv-ease-enter) both}.wt small{display:block;color:var(--dp-color-meta)}.wt .on{background:var(--cv-color-accent);color:var(--dp-color-on-accent)}.wt .on small{color:var(--dp-color-on-accent)}
+.lg{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 0;border-top:1px solid var(--cv-color-border)}.lg:first-of-type{border-top:0}
+.lg .tag,.lg .st{font-family:var(--cv-font-mono);font-size:var(--cv-font-size-metadata);letter-spacing:.06em}.lg .st{color:var(--dp-color-meta)}.lg.d .st{color:var(--g)}.lg .dt{grid-column:1/3;font-family:var(--cv-font-mono);font-size:var(--cv-font-size-small);color:var(--dp-color-read);word-break:break-word}.lg .dt b{color:var(--cv-color-text);font-weight:500}
+.lg:not(.d){opacity:.7}.lg.d{border-left:2px solid var(--g);padding-left:10px}
+.corep{text-align:center}.corep svg{filter:drop-shadow(0 0 18px rgba(63,214,198,.07))}.corep svg.rest{filter:drop-shadow(0 0 22px rgba(63,214,198,.28))}
+.nmap{width:100%;min-width:440px;height:auto}.ln{stroke-width:2}.ln.s-ok{stroke-dasharray:6 6}
+.nd,.srv{cursor:pointer;outline:none}.nd rect,.srv rect{fill:var(--dp-color-panel);stroke-width:2;transition:stroke var(--cv-motion-normal),fill var(--cv-motion-normal)}.nd:hover rect{fill:var(--cv-color-panel-hover)}.nd.sel rect{fill:var(--cv-color-panel-hover)}.nd:focus-visible rect{stroke-dasharray:4 3}
+.nd .t1,.srv .t1{font-size:13px;fill:var(--cv-color-text);font-family:var(--cv-font-mono)}.nd .t2,.srv .t2{font-size:11px;letter-spacing:.04em;font-family:var(--cv-font-mono)}
+.s-normal{--sc:var(--dp-color-neutral)}.s-warn{--sc:var(--dp-color-warning)}.s-danger{--sc:var(--dp-color-danger)}.s-ok{--sc:var(--dp-color-success)}
+.ln{stroke:var(--sc,var(--dp-color-neutral));transition:stroke var(--cv-motion-normal)}.nd rect,.srv rect{stroke:var(--sc,var(--dp-color-neutral))}.nd .t2,.srv .t2{fill:var(--sc,var(--dp-color-neutral))}
+.nd.s-danger rect{filter:drop-shadow(0 0 6px rgba(226,92,92,.45))}.nd.s-warn rect{filter:drop-shadow(0 0 5px rgba(224,163,62,.3))}.srv.s-ok rect{filter:drop-shadow(0 0 7px rgba(63,214,198,.35))}
+#nmap{position:relative;overflow:hidden;border-radius:var(--dp-radius-editorial)}
+span.s-normal,span.s-warn,span.s-danger,span.s-ok,b.s-ok,b.s-warn,b.s-danger{color:var(--sc)}.leg span{margin-right:14px;font-size:var(--cv-font-size-small)}.leg .lgdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:7px;vertical-align:.03em}
+.tl{list-style:none;margin:0;padding:0}.tl li{display:flex;gap:12px;padding:8px 0;border-left:2px solid var(--dp-color-hairline-2);padding-left:14px;margin-left:6px;position:relative;opacity:.55;transition:opacity var(--cv-motion-normal),border-color var(--cv-motion-normal)}.tl li.on{opacity:1;border-color:var(--g)}.tl li.cur{opacity:.95;border-color:var(--cv-color-accent)}
+.tl .dot{position:absolute;left:-7px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--cv-color-background);border:2px solid var(--dp-color-hairline-2)}.tl li.on .dot{background:var(--g);border-color:var(--g);box-shadow:0 0 10px rgba(63,214,198,.45)}
+.tl li.cur .dot{border-color:var(--cv-color-accent)}
+.bd{font-family:var(--cv-font-mono);font-size:var(--cv-font-size-metadata);letter-spacing:.06em;color:var(--dp-color-meta);margin-left:6px}.tl li.on .bd{color:var(--g)}.tl li.cur .bd{color:var(--cv-color-accent)}
+.mts{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--dp-gap)}.mt .bar{margin:6px 0;height:8px}.mt b{font-family:var(--cv-font-mono);font-variant-numeric:tabular-nums;font-weight:500}
+.b-ok{background:var(--cv-color-success)!important}.b-warn{background:var(--cv-color-warning)!important}.b-danger{background:var(--cv-color-danger)!important}
+html{scroll-behavior:smooth}
+/* screen transition: fade + settle + restrained blur, ~450ms, never blocks input */
+.enter>*{animation:rise var(--cv-motion-screen) var(--cv-ease-enter) both}.enter>*:nth-child(2){animation-delay:60ms}.enter>*:nth-child(3){animation-delay:120ms}.enter>*:nth-child(n+4){animation-delay:180ms}
+@keyframes rise{from{opacity:0;transform:translateY(10px) scale(.995);filter:blur(var(--cv-blur-subtle))}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes fade{from{opacity:0;transform:translateY(6px);filter:blur(var(--cv-blur-subtle))}to{opacity:1;transform:none;filter:blur(0)}}
+/* additive smoothness: first-load landing + staggered inner panels (motion only, no layout change) */
+#app{animation:boot var(--dp-motion-normal) var(--dp-motion-easing-out)}
+@keyframes boot{from{opacity:0;filter:blur(var(--dp-blur-subtle))}to{opacity:1;filter:blur(0)}}
+.enter>.grid2>.panel,.enter>.cards .panel{animation:rise var(--dp-motion-normal) var(--dp-motion-easing-out) both}
+.enter>.grid2>.panel:nth-child(2),.enter>.cards .panel:nth-child(2){animation-delay:90ms}
+@media(max-width:1100px){:root{--dp-gap:18px}.grid2{grid-template-columns:1fr 1.5fr}}
+@media(max-width:900px){.g2b{grid-template-columns:1fr}.mts{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.grid2,.hero{grid-template-columns:1fr}#app{padding:16px}.hero .frame::after{display:none}@keyframes rise{from{opacity:0;transform:translateY(6px);filter:blur(var(--dp-blur-subtle))}to{opacity:1;transform:none;filter:blur(0)}}}
+@media(max-width:520px){.panel{padding:16px}.cards{grid-template-columns:1fr}.mts{grid-template-columns:1fr}button{min-height:44px}.btn-sm{min-height:40px}.chip{min-height:42px}.hud{padding:14px}.hero .frame{padding:12px}.hud-id .mi{display:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}button:hover:not(:disabled),.chip:hover,.cards>.panel:hover{transform:none!important}.ov{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(3,3,3,.94)}}
+/* AMBIENT GLOW — additive only: static warm halo behind key cards (Financial palette; no existing rule touched) */
+.cards>.panel:not(.lock){position:relative}
+.cards>.panel:not(.lock)::before,.hero .frame::before{content:"";position:absolute;z-index:-1;pointer-events:none;inset:-26px -22px;border-radius:36px;background:radial-gradient(62% 58% at 50% 64%,rgba(63,214,198,.07),rgba(63,214,198,.035) 46%,transparent 74%);filter:blur(12px)}
+/* SHIFT SLIDER — continuous-feeling drag (logic stays integer via Math.round); additive: grooved track + visible thumb with hover/active states */
+input[type=range]{-webkit-appearance:none;appearance:none;height:26px;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:999px;background:var(--dp-color-line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-7px;border-radius:50%;background:var(--dp-color-accent);border:2px solid var(--dp-color-ground);box-shadow:0 0 0 1px var(--dp-color-line);transition:box-shadow var(--dp-motion-interaction) var(--dp-motion-easing),background-color var(--dp-motion-interaction) var(--dp-motion-easing)}
+input[type=range]:hover::-webkit-slider-thumb{background:#7ce4d8}
+input[type=range]:active::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(63,214,198,.25)}
+input[type=range]::-moz-range-track{height:4px;border-radius:999px;background:var(--dp-color-line)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--dp-color-accent);border:2px solid var(--dp-color-ground)}
+</style></head><body><div id="app"></div>
+<script>
+const KEY='cyb4_level4_progress',HINT_PEN=20;
+const def=()=>({xp:{},hint:{},l3done:false,l4unlocked:false,l4done:false,keys:[],time:{3:0,4:0},started:false});
+let S;try{S=Object.assign(def(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){S=def()}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=s=>document.querySelector(s),app=$('#app');
+const total=()=>Object.values(S.xp).reduce((a,b)=>a+b,0);
+const fmt=t=>String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');
+const norm=s=>s.toUpperCase().replace(/\s+/g,' ').trim();
+const caesar=(t,s)=>t.replace(/[A-Z]/g,c=>String.fromCharCode(((c.charCodeAt(0)-65-s)%26+26)%26+65));
+const hintsUsed=l=>Object.keys(S.hint).filter(k=>k[0]==(l==3?'c':'i')||(l==4&&k=='fd')).length;
+let cur=null,tick=null,step=0,solved=false,pen=0,sel=new Set(),fbHtml='',bin=[];
+/* inline SVG icon set — one family: 24 viewBox, stroke 2, round caps; decorative (text carries the meaning) */
+const FI=p=>'<svg class="fi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>';
+const IC_OK=FI('<path d="M20 6 9 17l-5-5"/>');
+const IC_WARN=FI('<path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 20h16a2 2 0 0 0 1.73-2Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>');
+const IC_BULB=FI('<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>');
+const IC_CLOCK=FI('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>');
+const IC_KEY=FI('<path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/>');
+const IC_LOCK=FI('<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>');
+const IC_UNLOCK=FI('<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>');
+const IC_CBON=FI('<rect x="3" y="3" width="18" height="18" rx="4"/><path d="m8.5 12 2.5 2.5 5-5"/>');
+const IC_CBOFF=FI('<rect x="3" y="3" width="18" height="18" rx="4"/>');
+function startTimer(l){stopTimer();cur=l;tick=setInterval(()=>{S.time[l]++;save();const e=$('#tm');if(e)e.textContent=fmt(S.time[l])},1000)}
+function stopTimer(){clearInterval(tick);cur=null}
+function award(id,base){if(S.xp[id]!=null)return 0;const v=Math.max(0,base-(S.hint[id]?HINT_PEN:0));S.xp[id]=v;save();pop('+'+v+' XP');return v}
+function pop(t){const d=document.createElement('div');d.className='pop';d.textContent=t;document.body.appendChild(d);setTimeout(()=>{d.classList.add('out');setTimeout(()=>d.remove(),160)},1640)}/* same 1800ms lifetime, +blur/fade exit */
+function overlay(title,sub,ms,cb){const o=document.createElement('div');o.className='ov';o.innerHTML='<h1>'+title+'</h1><p class="sub">'+sub+'</p><div class="bar" style="width:260px"><i style="width:0"></i></div>';document.body.appendChild(o);setTimeout(()=>o.querySelector('i').style.width='100%',50);setTimeout(()=>{o.classList.add('exiting');setTimeout(()=>{o.remove();cb&&cb()},180)},ms)}
+const keysHtml=()=>[3,4].map(k=>'<span class="key '+(S.keys.includes(k)?'':'off')+'">'+(S.keys.includes(k)?IC_KEY:IC_LOCK)+'KEY 0'+k+'</span>').join('');
+function hud(l,prog,label){return '<div class="panel hud"><div class="hud-id"><b>CYBERVERSE</b><span class="sep"></span><span>LEVEL '+l+'</span><span class="sep"></span><span class="mi">'+label+'</span></div><div><span class="kpi">XP: <b>'+total()+'</b></span><span class="sep"></span><span class="kpi">'+IC_CLOCK+'<b id="tm">'+fmt(S.time[l])+'</b></span><span class="sep"></span><span class="kpi">Hint: <b>'+hintsUsed(l)+'</b></span> '+keysHtml()+' <button class="w btn-sm" onclick="askReset()">RESET</button></div><div class="bar" style="width:100%"><i style="width:'+prog+'%"></i></div></div>'}
+let curScr='',viaGo=false,enterT=0;
+function go(s,anim){stopTimer();fbHtml='';solved=false;sel=new Set();pen=0;const a=anim!==false&&s!==curScr;curScr=s;clearTimeout(enterT);app.classList.remove('enter');viaGo=true;({menu,select,l3,l3end,l4,win,report})[s]();viaGo=false;
+if(a){void app.offsetWidth;app.classList.add('enter');enterT=setTimeout(()=>app.classList.remove('enter'),800)}window.scrollTo(0,0)}
+function loadScreen(next){overlay('LOADING…','Đang kết nối CYBERVERSE',700,next)}
+/* ---------- MENU ---------- */
+function menu(){app.innerHTML='<div class="hero"><div><p class="sub">CYBERVERSE PRESENTS</p><h1>THE LAST FIREWALL</h1><p style="color:var(--dp-color-accent);font-weight:600">Hai nhiệm vụ. Một hệ thống. Hãy bảo vệ CYBERVERSE.</p><p class="sub">Năm 2089, một cuộc tấn công mạng đã làm suy yếu tường lửa (Firewall) cuối cùng của CYBERVERSE. Bạn là Đặc vụ mạng (Cyber Agent) và phải khôi phục hệ thống. Mọi dữ liệu trong game đều là giả lập.</p><button class="g" onclick="go(\'select\')">KHỞI ĐỘNG HỆ THỐNG</button> <button onclick="askReset()">RESET</button></div><div class="frame"><svg viewBox="0 0 320 260" role="img" aria-label="Bốn thành phần hội tụ về CYBERVERSE"><defs><linearGradient id="gb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3FD6C6"/><stop offset="1" stop-color="#9FEFE6"/></linearGradient></defs><circle cx="160" cy="130" r="92" fill="none" stroke="#222222"/><g stroke="#303030" stroke-width="1.5"><line x1="95" y1="52" x2="160" y2="130"/><line x1="225" y1="52" x2="160" y2="130"/><line x1="95" y1="208" x2="160" y2="130"/><line x1="225" y1="208" x2="160" y2="130"/></g><circle cx="160" cy="130" r="40" fill="url(#gb)"/><text x="160" y="134" text-anchor="middle" font-size="11" font-weight="700" fill="#0a0a0a">CYBERVERSE</text><g fill="#0e0e0e" stroke="#222222"><rect x="40" y="36" width="110" height="32" rx="8"/><rect x="170" y="36" width="110" height="32" rx="8"/><rect x="40" y="192" width="110" height="32" rx="8"/><rect x="170" y="192" width="110" height="32" rx="8"/></g><g font-size="13" fill="#f2f2f2" text-anchor="middle"><text x="95" y="57">Identity</text><text x="225" y="57">Encryption</text><text x="95" y="213">Backup</text><text x="225" y="213">Firewall</text></g></svg></div></div>'}
+function select(){
+app.innerHTML='<div class="panel hud"><div>XP: <b>'+total()+'</b> / 2000</div><div>'+keysHtml()+'</div></div><div class="cards">'+
+'<div class="panel"><h2>LEVEL 4 – FINAL FIREWALL</h2><p style="color:var(--g)">'+(S.l4done?'COMPLETE':'UNLOCKED')+'</p><p class="sub">Ứng phó sự cố an ninh mạng (Incident Response) và khôi phục tường lửa (Firewall) THE LAST FIREWALL.</p><button class="g" onclick="enter(4)">'+(S.l4done?'PLAY AGAIN (không cộng XP)':'START')+'</button></div></div>'+
+'<button class="w" onclick="askReset()">RESET</button> <button onclick="go(\'menu\')">MAIN MENU</button>'}
+function enter(l){if(l==3)return;S.started=true;save();loadScreen(()=>{if(l==3){step=Math.max(0,['c1','c2','c3'].findIndex(i=>S.xp[i]==null));go('l3')}else{step=Math.max(0,['i1','i2','i3','fd'].findIndex(i=>S.xp[i]==null));go('l4')}})}
+/* ---------- LEVEL 3 ---------- */
+let CH,INC,FD,SC;
+let shift=1;
+function rollShift(){/* new cipher target at each round start: fresh integer in [1,25]; both Caesar challenges re-encoded with the SAME target so the 'same Shift as Challenge 1' hint stays true */
+if(!CH)return;const sh=1+Math.floor(Math.random()*25);CH[0].enc=caesar(CH[0].ans,-sh);CH[2].enc=caesar(CH[2].ans,-sh);CH[0].edu=CH[0].edu.replace(/Shift\s*=\s*\d+/,'Shift = '+sh)}
+function l3(){const c=CH[step],done=S.xp[c.id]!=null;if(!viaGo)app.classList.remove('enter');if(!S.l3done)startTimer(3);
+let h=hud(3,(step+(solved?1:0))/3*100,'ENCRYPTION CORE – Thử thách '+(step+1)+'/3: '+c.name)+'<div class="panel"><h2>'+c.name+'</h2><p class="sub"><b>Tình huống – '+SC.title+':</b> '+SC.sit+'</p><p class="sub">'+(step==0?'Hệ thống phát hiện một thông điệp bị mã hóa (Encryption). Hãy giải mã để khôi phục liên lạc.':step==2?'Thông điệp mã hóa cuối cùng':'Tín hiệu nhị phân (Binary) nhận được')+(S.xp[c.id]!=null&&!solved?' • (đã hoàn thành – chế độ luyện tập, không cộng XP)':'')+'</p>';
+if(c.id=='c2'){h+='<p class="sub">Thứ tự các nhóm 8 bit đã bị xáo trộn. Bấm vào từng nhóm để giải mã; sau đó tự sắp xếp các ký tự đã giải mã thành thông điệp có nghĩa. Bấm GIẢI MÃ TẤT CẢ để giải mã tất cả.</p><div class="chips">'+c.enc.split(' ').map((b,i)=>'<div class="chip '+(bin[i]?'done':'')+'" tabindex="0" role="button" aria-label="Giải mã nhóm '+(i+1)+'" onclick="decBit('+i+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();decBit('+i+')}">'+b+'<br>'+(bin[i]?parseInt(b,2)+' → <b>'+String.fromCharCode(parseInt(b,2))+'</b>':'?')+'</div>').join('')+'</div><button onclick="decAll()">GIẢI MÃ TẤT CẢ</button>'}
+else{h+='<div class="mono">'+c.enc+'</div><p class="sub">BẢNG CHỮ CÁI: ABCDEFGHIJKLMNOPQRSTUVWXYZ</p><p>ĐỘ DỊCH (Shift): <b id="sv" style="color:var(--cv-color-value)">'+shift+'</b></p><input type="range" min="1" max="25" step="0.25" value="'+shift+'" aria-label="ĐỘ DỊCH (Shift)" oninput="shift=Math.round(+this.value);updRaf()" onchange="this.value=shift"><p class="sub">KẾT QUẢ GIẢI MÃ TRỰC TIẾP:</p><div class="mono" id="prev">'+caesar(c.enc,shift)+'</div>'}
+h+='<p><label for="ans">NHẬP ĐÁP ÁN:</label><input type="text" id="ans" autocomplete="off" '+(solved?'disabled':'')+' onkeydown="if(event.key==\'Enter\')chk3()"></p><button class="g" onclick="chk3()" '+(solved?'disabled':'')+'>GIẢI MÃ THÔNG ĐIỆP</button> <button class="w" onclick="hint(\''+c.id+'\')">HINT'+(S.hint[c.id]||done?'':' (-'+HINT_PEN+' XP)')+'</button><div id="fb">'+fbHtml+'</div></div>';
+app.innerHTML=h+aux3()}
+function upd(){const c=CH[step];$('#sv').textContent=shift;$('#prev').textContent=caesar(c.enc,shift);labUpd()}
+let _ur=0;function updRaf(){cancelAnimationFrame(_ur);_ur=requestAnimationFrame(upd)}/* batch slider oninput → 1 DOM pass/frame */
+function decBit(i){bin[i]=1;lastBit=i;keepAns(l3)}
+function decAll(){const n=CH[1].enc.split(' ').length;for(let i=0;i<n;i++)bin[i]=1;lastBit=n-1;keepAns(l3)}
+function keepAns(f){const v=($('#ans')||{}).value;f();if(v!=null&&$('#ans'))$('#ans').value=v}
+function hint(id){const c=CH.find(x=>x.id==id)||INC.find(x=>x.id==id)||FD;if(S.xp[id]==null&&!S.hint[id]){S.hint[id]=true;save()}
+fbHtml='<div class="fb no"><h3>'+IC_BULB+' HINT</h3><p>'+c.hint+'</p>'+(S.xp[id]==null?'<p class="sub">Phạt Hint: -'+HINT_PEN+' XP (chỉ trừ 1 lần cho mỗi nhiệm vụ).</p>':'')+'</div>';
+const v=($('#ans')||{}).value;(S.keys.length||id[0]=='c'?(id[0]=='c'?l3:l4):l4)();if(v!=null&&$('#ans'))$('#ans').value=v}
+function chk3(){const c=CH[step];if(solved)return;const a=norm($('#ans').value);
+let right=a==c.ans;if(c.id=='c2'&&right&&bin.filter(Boolean).length<5){/* player may type answer after using decoder */}
+if(!right){fbHtml='<div class="fb no"><h3>'+IC_WARN+' RETRY</h3><p>'+(a?'"'+a.replace(/[<>&]/g,'')+'" chưa phải thông điệp gốc. ':'Hãy nhập đáp án. ')+(c.id=='c2'?'Kiểm tra lại: mỗi nhóm 8 bit → số thập phân → ký tự ASCII (65 = A).':'Điều chỉnh Shift cho đến khi phần giải mã thành những từ tiếng Anh có nghĩa rồi gõ lại.')+'</p></div>';return l3a()}
+const v=award(c.id,c.xp);solved=true;
+fbHtml='<div class="fb ok"><h3>'+IC_OK+' SUCCESS '+(v?'+'+v+' XP':'(luyện tập – không cộng XP)')+'</h3><p>'+c.edu+'</p><button class="g" onclick="next3()">'+(step<2?'NEXT':'HOÀN TẤT')+'</button></div>';l3a();$('#ans').value=c.ans}
+function l3a(){const v=($('#ans')||{}).value;l3();if($('#ans'))$('#ans').value=v}
+function next3(){if(step<2){step++;shift=1;bin=[];go('l3',false)}else{const first=!S.l3done;if(first){S.l3done=true;S.l4unlocked=true;if(!S.keys.includes(3))S.keys.push(3);save()}stopTimer();overlay('GIẢI MÃ THÀNH CÔNG','Đã khôi phục ENCRYPTION CORE',1500,()=>go('l3end'))}}
+function l3end(){const x=S.xp;app.innerHTML=hud(3,100,'COMPLETE')+'<div class="panel center" style="padding-top:20px"><h1 style="font-size:40px">ĐÃ KHÔI PHỤC ENCRYPTION CORE</h1><p>XP Level 3: <b style="color:var(--g)">'+((x.c1||0)+(x.c2||0)+(x.c3||0))+' / 1000</b> | Thời gian: <b>'+fmt(S.time[3])+'</b> | Hint đã dùng: <b>'+hintsUsed(3)+'</b></p><p>'+IC_UNLOCK+' Đã mở khóa bảo mật (Security Key) 03</p><button class="g" onclick="enter(4)">CONTINUE: FINAL FIREWALL</button> <button onclick="go(\'select\')">MISSION</button></div>'}
+/* ---------- LEVEL 4 ---------- */
+const NODES=['Identity Core','Backup System','Encryption Core','Firewall'];
+function stats(){const d=id=>S.xp[id]!=null,f=d('fd');let h=35,i=30,s=30,n=30;INC.forEach(c=>{if(d(c.id)){h+=c.fx.h||0;i+=c.fx.i||0;s+=c.fx.s||0;n+=c.fx.n||0}});if(f){h=i=s=n=100}return{h:Math.max(5,Math.min(100,h-pen)),i:Math.min(100,i),s:Math.min(100,s),n:Math.min(100,n)}}
+const sb=(n,v,c)=>'<p style="margin:8px 0 2px">'+n+': <b style="color:'+c+'">'+v+'%</b></p><div class="bar"><i style="width:'+v+'%;background:'+c+'"></i></div>';
+function l4(){if(!viaGo)app.classList.remove('enter');if(!S.l4done)startTimer(4);const st=stats(),all=INC.concat([{id:'fd',name:'QUYẾT ĐỊNH CUỐI CÙNG'}]),inc=step<3?INC[step]:null;
+let h=hud(4,(step+(solved?1:0))/4*100,'FINAL FIREWALL – '+(step<3?'Sự cố 0'+(step+1)+'/3':'Quyết định cuối cùng'))+'<div class="grid2"><div class="panel"><h3>TRẠNG THÁI HỆ THỐNG</h3>'+sb('Sức khỏe hệ thống',st.h,'#F2F2F2')+sb('Toàn vẹn dữ liệu',st.i,'#3FD6C6')+sb('Mức bảo mật',st.s,'#94A3B8')+'<p class="sub">Máy chủ: '+(st.h>60?'<b style="color:var(--g)">ONLINE</b>':'<b style="color:var(--d)">SUY GIẢM</b>')+' | Mạng: '+(st.s>60?'<b style="color:var(--g)">AN TOÀN</b>':'<b style="color:var(--d)">BỊ HỞ</b>')+'</p><h3>SỰ CỐ</h3>'+all.map(c=>'<div class="inc '+(S.xp[c.id]!=null?'ok2':'')+'">'+(S.xp[c.id]!=null?IC_OK+' ':IC_WARN+' ')+c.name+'</div>').join('')+'<h3>SƠ ĐỒ HỆ THỐNG</h3>'+NODES.map((n,i)=>'<span class="node '+(step==3&&[...sel].some(k=>FD.opts[k][3]==i)||S.xp.fd!=null?'on':'')+'">'+n+'</span>').join('')+'</div><div class="panel">';
+if(inc){const L='ABCD';h+='<h2>SỰ CỐ 0'+(step+1)+' – '+inc.name+'</h2>'+(step==0?'<p class=sub>Sau khi Encryption Core được khôi phục, nhiều sự cố an ninh mạng xảy ra cùng lúc. Bạn là Nhân viên an ninh (Security Operator): hãy xử lý từng sự cố.</p><p class=sub><b>Tình huống – '+SC.title+':</b> '+SC.intro+'</p>':'')+'<pre>'+inc.alert+'</pre>'+(S.xp[inc.id]!=null&&!solved?'<p class="sub">(đã hoàn thành – luyện tập, không cộng XP)</p>':'')+inc.opts.map((o,i)=>'<button class="opt" '+(solved?'disabled':'')+' onclick="pick('+i+')">'+L[i]+'. '+o+'</button>').join('')+'<button class="w" onclick="hint(\''+inc.id+'\')">HINT'+(S.hint[inc.id]||S.xp[inc.id]!=null?'':' (-'+HINT_PEN+' XP)')+'</button>'}
+else{h+='<h2>QUYẾT ĐỊNH CUỐI CÙNG – KHÔI PHỤC THE LAST FIREWALL</h2><p style="color:var(--g)">Đã xem xét xong mọi sự cố. Hãy chọn các biện pháp bảo vệ cuối cùng.</p><p class="sub">Chọn đúng 4 biện pháp an toàn (có thể chọn/bỏ chọn).</p>'+FD.opts.map((o,i)=>'<button class="opt '+(sel.has(i)?'sel':'')+'" '+(solved?'disabled':'')+' onclick="tog('+i+')">'+(sel.has(i)?IC_CBON+' ':IC_CBOFF+' ')+o[0]+'</button>').join('')+'<button class="g" onclick="restore()" '+(solved?'disabled':'')+'>KHÔI PHỤC TƯỜNG LỬA</button> <button class="w" onclick="hint(\'fd\')">HINT'+(S.hint.fd||S.xp.fd!=null?'':' (-'+HINT_PEN+' XP)')+'</button>'}
+app.innerHTML=h+'<div>'+fbHtml+'</div></div></div>'+aux4()}
+function pick(i){const c=INC[step];if(solved)return;
+if(i!=c.ok){pen=Math.min(pen+8,40);fbHtml='<div class="fb no"><h3>'+IC_WARN+' RETRY – CHƯA AN TOÀN</h3><p>'+c.why[i]+'</p><p class="sub">Sức khỏe hệ thống bị giảm. Hãy cân nhắc lại hành động an toàn hơn.</p></div>';return l4()}
+const v=award(c.id,200);solved=true;pen=0;fbHtml='<div class="fb ok"><h3>'+IC_OK+' '+c.done+' '+(v?'+'+v+' XP':'(luyện tập)')+'</h3><p>'+c.why[i]+'</p><button class="g" onclick="next4()">'+(step<2?'NEXT':'NEXT: QUYẾT ĐỊNH CUỐI CÙNG')+'</button></div>';l4()}
+function next4(){step++;go('l4',false)}
+function tog(i){sel.has(i)?sel.delete(i):sel.add(i);const o=FD.opts[i];fbHtml='<div class="fb '+(o[1]?'ok':'no')+'"><h3>'+(sel.has(i)?'ĐÃ CHỌN':'ĐÃ BỎ CHỌN')+'</h3><p>'+(o[1]?o[2]:IC_WARN+' '+o[2])+'</p></div>';l4()}
+function restore(){const bad=[...sel].filter(i=>!FD.opts[i][1]),miss=FD.opts.map((o,i)=>o[1]?i:-1).filter(i=>i>=0&&!sel.has(i));
+if(bad.length){pen=Math.min(pen+8,40);fbHtml='<div class="fb no"><h3>'+IC_WARN+' BIỆN PHÁP KHÔNG AN TOÀN</h3>'+bad.map(i=>'<p>• '+FD.opts[i][0]+': '+FD.opts[i][2]+'</p>').join('')+'<p class="sub">Bỏ chọn biện pháp không an toàn rồi thử lại.</p></div>';return l4()}
+if(miss.length){fbHtml='<div class="fb no"><h3>'+IC_WARN+' CHƯA ĐỦ BIỆN PHÁP</h3><p>Còn thiếu '+miss.length+' biện pháp cần thiết. Hãy nghĩ: bảo vệ tài khoản → khôi phục → kiểm tra → giám sát. Firewall chưa thể khôi phục.</p></div>';return l4()}
+pen=0;const v=award('fd',400);solved=true;if(!S.l4done){S.l4done=true;if(!S.keys.includes(4))S.keys.push(4);save()}stopTimer();
+overlay('ĐÃ KHÔI PHỤC TƯỜNG LỬA','Đang khôi phục hệ thống…  +'+v+' XP',2200,()=>go('win'))}
+function win(){app.innerHTML=hud(4,100,'MISSION COMPLETE')+'<div class="panel center" style="padding-top:20px"><h1 style="font-size:36px">ĐÃ KHÔI PHỤC THE LAST FIREWALL</h1><pre style="color:var(--g)">Hệ thống an ninh CYBERVERSE: ĐANG HOẠT ĐỘNG\n\nMọi sự cố: Đã xử lý\nEncryption Core: Đã khôi phục\nFinal Firewall: Đang hoạt động\n\nNHIỆM VỤ HOÀN THÀNH.</pre><p>XP Level 4: <b>'+(['i1','i2','i3','fd'].reduce((a,k)=>a+(S.xp[k]||0),0))+'/1000</b> | Tổng XP: <b style="color:var(--g)">'+total()+'/2000</b></p><p>Thời gian: L3 <b>'+fmt(S.time[3])+'</b> · L4 <b>'+fmt(S.time[4])+'</b> | Hint: <b>'+(hintsUsed(3)+hintsUsed(4))+'</b></p><p>Level 3 '+IC_OK+' Level 4 '+IC_OK+' '+keysHtml()+'</p><button onclick="go(\'report\')">MISSION REPORT</button> <button class="g" onclick="doReset(true);enter(4)">PLAY AGAIN</button> <button onclick="go(\'menu\')">MAIN MENU</button></div>'}
+function report(){app.innerHTML='<div class="panel"><h2>BÁO CÁO NHIỆM VỤ – Kiến thức đã học</h2><ul style="line-height:1.8"><li><b>Caesar Cipher:</b> mã hóa thay thế bằng cách dịch chữ cái; dễ bị bẻ (chỉ 25 khóa), chỉ dùng để học.</li><li><b>Binary & ASCII:</b> dữ liệu là chuỗi bit 0/1; 8 bit = 1 byte = 1 ký tự ASCII. Đây là biểu diễn, không phải bảo mật.</li><li><b>Mã hóa:</b> bảo vệ tính bảo mật; thực tế dùng thuật toán mạnh như AES.</li><li><b>Tài khoản bị chiếm:</b> khóa tạm thời, xác minh qua kênh độc lập, không chia sẻ mật khẩu.</li><li><b>Mất dữ liệu:</b> khôi phục từ backup đáng tin cậy và kiểm tra toàn vẹn; không dùng nguồn không rõ.</li><li><b>Xâm nhập:</b> ghi nhận, cô lập có kiểm soát, bảo toàn log, báo người có trách nhiệm.</li><li><b>Tình huống '+SC.title+':</b> '+SC.lesson+'</li><li><b>Phòng thủ nhiều lớp:</b> xác thực + backup + kiểm tra toàn vẹn + giám sát liên tục.</li></ul><button onclick="go(\'win\')">BACK</button> <button onclick="go(\'menu\')">MAIN MENU</button></div>'}
+
+const AB='ABCDEFGHIJKLMNOPQRSTUVWXYZ';let nsel=null,lastBit=-1;
+const stripCells=(sh,set)=>(AB+AB+AB).split('').map((ch,k)=>{const p=((k-(26-sh))%26+26)%26;return '<i class="'+(set.has(AB[p])?'hl':'')+'">'+ch+'</i>'}).join('');
+const stripX=sh=>'translateX(-'+((26-sh)/78*100)+'%)';
+function labCap(c){const f=c.enc[0];return 'Ví dụ: chữ <b>'+f+'</b> đầu thông điệp được giải mã thành <b>'+caesar(f,shift)+'</b> (lùi '+shift+' vị trí).'}
+function labUpd(){const st=$('#strip');if(!st)return;const c=CH[step],set=new Set(c.enc.replace(/[^A-Z]/g,'').split(''));
+st.style.transform=stripX(shift);[...st.children].forEach((e,k)=>e.classList.toggle('hl',set.has(AB[((k-(26-shift))%26+26)%26])));$('#labcap').innerHTML=labCap(c)}
+function arc(a0,a1,r){const p=a=>[80+r*Math.cos(a*Math.PI/180),80+r*Math.sin(a*Math.PI/180)].map(v=>v.toFixed(1));const[x0,y0]=p(a0),[x1,y1]=p(a1);return 'M'+x0+' '+y0+' A'+r+' '+r+' 0 0 1 '+x1+' '+y1}
+function aux3(){const c=CH[step];let lab;
+if(c.id=='c2'){const g=lastBit>=0?c.enc.split(' ')[lastBit]:null;
+lab=g?'<p class="sub">Nhóm '+(lastBit+1)+': mỗi bit bằng 1 cộng thêm giá trị của vị trí đó.</p><div class="wt">'+g.split('').map((b,i)=>'<div class="'+(b=='1'?'on':'')+'"><small>'+(128>>i)+'</small>'+b+'</div>').join('')+'</div><p>'+g.split('').map((b,i)=>b=='1'?128>>i:null).filter(v=>v).join(' + ')+' = <b>'+parseInt(g,2)+'</b> → ký tự ASCII <b>'+String.fromCharCode(parseInt(g,2))+'</b></p>':'<p class="sub">Thử thách này dùng mã ASCII, không dùng Shift. Hãy bấm vào một nhóm 8 bit để xem cách tính giá trị của nó.</p>'}
+else{const set=new Set(c.enc.replace(/[^A-Z]/g,'').split(''));
+lab='<div class="scr"><div class="lrow"><span>Chữ trong thông điệp mã hóa</span><div class="top">'+AB.split('').map(ch=>'<i class="'+(set.has(ch)?'hl':'')+'">'+ch+'</i>').join('')+'</div></div><div class="lrow"><span>Chữ sau khi giải mã (Shift = <b>'+shift+'</b>)</span><div class="win"><div class="strip" id="strip" style="transform:'+stripX(shift)+'">'+stripCells(shift,set)+'</div></div></div></div><p id="labcap">'+labCap(c)+'</p>'}
+const rows=CH.map((x,i)=>{const d=S.xp[x.id]!=null,cur=i==step&&!d;return '<div class="lg '+(d?'d':'')+'"><span class="tag">['+String(i+1).padStart(2,'0')+'] '+x.name+'</span><span class="st">'+(d?'COMPLETED':'PENDING')+'</span><span class="dt">'+(d||cur?'Đầu vào: '+x.enc:'Đầu vào: chưa nhận')+(d?' → Kết quả: <b>'+x.ans+'</b> · +'+S.xp[x.id]+' XP'+(S.hint[x.id]?' · đã dùng Hint':''):'')+'</span></div>'}).join('');
+const n=['c1','c2','c3'].filter(k=>S.xp[k]!=null).length,all=n==3,col=k=>S.xp[k]!=null?'var(--dp-color-live)':'var(--dp-color-hairline-2)';
+const core='<svg viewBox="0 0 160 160" width="170" height="170" role="img" aria-label="Encryption Core: '+n+'/3 phần đã kích hoạt" class="'+(all?'rest':'')+'">'+[0,1,2].map(i=>'<path d="'+arc(-90+i*120+10,-90+i*120+110,58)+'" stroke="'+col(['c1','c2','c3'][i])+'" stroke-width="12" fill="none" stroke-linecap="round" style="transition:stroke .5s"/>').join('')+'<circle cx="80" cy="80" r="30" fill="'+(all?'var(--dp-color-live)':'var(--dp-color-panel)')+'" stroke="var(--dp-color-hairline-2)" style="transition:fill .6s"/><text x="80" y="87" text-anchor="middle" font-size="20" fill="'+(all?'#0a0a0a':'#f2f2f2')+'">'+n+'/3</text></svg>';
+return '<div class="panel"><h3>ENCRYPTION LAB – Phòng thí nghiệm mã hóa</h3>'+lab+'</div><div class="g2b"><div class="panel"><h3>TRANSMISSION LOG – Nhật ký giải mã</h3>'+rows+'</div><div class="panel corep"><h3>CORE STATUS – Trạng thái lõi</h3>'+core+'<p><b style="color:'+(all?'var(--g)':'var(--dp-color-bright)')+'">'+(all?'RESTORED':n?'ĐANG KÍCH HOẠT '+n+'/3':'OFFLINE')+'</b></p><p class="sub">Phần 1 Caesar: '+(S.xp.c1!=null?'ACTIVE':'OFFLINE')+' · Phần 2 Binary: '+(S.xp.c2!=null?'ACTIVE':'OFFLINE')+' · Phần 3 Giải mã cuối: '+(S.xp.c3!=null?'ACTIVE':'OFFLINE')+'</p></div></div>'}
+/* level 4 aux */
+const NODES4=[['NODE-01','i1','Máy chủ xác thực tài khoản',80,55],['NODE-02','i2','Cơ sở dữ liệu chính',80,245],['NODE-03',null,'Hệ thống sao lưu (Backup)',260,40],['NODE-04','i3','Cổng truy cập mạng',440,55],['NODE-05',null,'Máy chủ nhật ký (Log)',440,245]];
+const SL={normal:['BÌNH THƯỜNG','Đang hoạt động bình thường.'],warn:['CẢNH BÁO','Có liên quan đến một sự cố chưa được xử lý.'],danger:['BỊ ẢNH HƯỞNG','Đang là mục tiêu của sự cố hiện tại.'],ok:['ĐÃ XỬ LÝ','Sự cố đã được xử lý, hoạt động ổn định.']};
+function nstate(n){const d=k=>S.xp[k]!=null,act=['i1','i2','i3'].find(k=>!d(k));if(!act)return 'ok';return n[1]?(d(n[1])?'ok':n[1]==act?'danger':'warn'):'normal'}
+function mapHtml(){const ns=NODES4.map(nstate);
+const lines=NODES4.map((n,i)=>'<line x1="260" y1="150" x2="'+n[3]+'" y2="'+n[4]+'" class="ln s-'+ns[i]+'"/>').join('');
+const nodes=NODES4.map((n,i)=>'<g class="nd s-'+ns[i]+(nsel===i?' sel':'')+'" tabindex="0" role="button" aria-label="'+n[0]+': '+SL[ns[i]][0]+'" onclick="selNode('+i+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selNode('+i+')}"><rect x="'+(n[3]-62)+'" y="'+(n[4]-23)+'" width="124" height="46" rx="6"/><text x="'+n[3]+'" y="'+(n[4]-3)+'" text-anchor="middle" class="t1">'+n[0]+'</text><text x="'+n[3]+'" y="'+(n[4]+14)+'" text-anchor="middle" class="t2">'+SL[ns[i]][0]+'</text></g>').join('');
+const allok=ns.every(x=>x=='ok');
+const det=nsel!==null?'<b>'+NODES4[nsel][0]+'</b> – '+NODES4[nsel][2]+'. Trạng thái: <b>'+SL[ns[nsel]][0]+'</b>. '+SL[ns[nsel]][1]:'Chọn một NODE để xem chi tiết.';
+return '<div class="scr"><svg viewBox="0 0 520 290" class="nmap" role="img" aria-label="Bản đồ mạng mô phỏng">'+lines+'<g class="srv s-'+(allok?'ok':'normal')+'"><rect x="205" y="127" width="110" height="46" rx="6"/><text x="260" y="146" text-anchor="middle" class="t1">MÁY CHỦ</text><text x="260" y="163" text-anchor="middle" class="t2">'+(allok?'ỔN ĐỊNH':'TRUNG TÂM')+'</text></g>'+nodes+'</svg></div><p class="leg"><span class="s-normal"><i class="lgdot" aria-hidden="true"></i>Bình thường</span> <span class="s-warn"><i class="lgdot" aria-hidden="true"></i>Cảnh báo</span> <span class="s-danger"><i class="lgdot" aria-hidden="true"></i>Bị ảnh hưởng</span> <span class="s-ok"><i class="lgdot" aria-hidden="true"></i>Đã xử lý</span></p><p id="ndet">'+det+'</p>'}
+function selNode(i){nsel=i;$('#nmap').innerHTML=mapHtml();const g=document.querySelectorAll('#nmap .nd')[i];if(g)g.focus()}
+function aux4(){const d=k=>S.xp[k]!=null,all3=d('i1')&&d('i2')&&d('i3'),st=stats();
+const T=[[d('i1'),'Phát hiện đăng nhập bất thường','Tài khoản '+SC.a+' đăng nhập từ một thiết bị lạ.'],[d('i2'),'Phát hiện lỗi dữ liệu','Cơ sở dữ liệu '+SC.d+' bị hỏng, cần khôi phục.'],[d('i3'),'Phát hiện truy cập trái phép','NODE-04 có dấu hiệu bị truy cập trái phép.'],[all3,'Hoàn thành xử lý các sự cố','Cả ba sự cố đã được xử lý đúng cách.'],[d('fd'),'Khôi phục THE LAST FIREWALL','Các biện pháp bảo vệ cuối cùng đã được kích hoạt.']];
+const tl=T.map((t,i)=>'<li class="'+(t[0]?'on':!T.slice(0,i).some(x=>!x[0])?'cur':'')+'"><span class="dot"></span><div><b>'+(i+1)+'. '+t[1]+'</b> <span class="bd">'+(t[0]?'COMPLETED':'PENDING')+'</span><br><span class="sub">'+t[2]+'</span></div></li>').join('');
+const M=[['SYSTEM HEALTH – Sức khỏe hệ thống',st.h],['DATA INTEGRITY – Toàn vẹn dữ liệu',st.i],['SECURITY LEVEL – Mức bảo mật',st.s],['NETWORK STATUS – Trạng thái mạng',st.n]];
+const mt=M.map(m=>{const v=m[1],c=v>=70?'ok':v>=40?'warn':'danger',l=v>=70?'ỔN ĐỊNH':v>=40?'CẢNH BÁO':'NGUY HIỂM';return '<div class="mt"><span class="sub">'+m[0]+'</span><div class="bar"><i class="b-'+c+'" style="width:'+v+'%"></i></div><b class="s-'+c+'">'+v+'% · '+l+'</b></div>'}).join('');
+return '<div class="g2b"><div class="panel"><h3>NETWORK MAP – Bản đồ mạng</h3><div id="nmap">'+mapHtml()+'</div></div><div class="panel"><h3>INCIDENT TIMELINE – Diễn biến sự cố</h3><ul class="tl">'+tl+'</ul></div></div><div class="panel"><h3>SYSTEM MONITOR – Giám sát hệ thống</h3><div class="mts">'+mt+'</div>'+(d('fd')?'<p style="color:var(--g)">Hệ thống đã đạt trạng thái ổn định.</p>':'')+'</div>'}
+function toast(t,m){const d=document.createElement('div');d.className='pop big';d.innerHTML='<b>'+t+'</b><br>'+m;document.body.appendChild(d);setTimeout(()=>d.remove(),4500)}
+function doReset(silent){stopTimer();try{localStorage.removeItem(KEY)}catch(e){}S=def();newSession();step=0;shift=1;bin=[];sel=new Set();pen=0;solved=false;fbHtml='';nsel=null;lastBit=-1;
+document.querySelectorAll('.ov,.pop').forEach(e=>e.remove());if(silent)return;go('menu');toast('SYSTEM RESET COMPLETE','Tiến trình game đã được đặt lại thành công. Hãy bấm START để chơi lại từ đầu.')}
+function askReset(){if(document.getElementById('rm'))return;const o=document.createElement('div');o.className='ov';o.id='rm';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-labelledby','rmt');
+o.innerHTML='<div class="panel" style="max-width:520px;text-align:left"><h2 id="rmt">RESET GAME?</h2><p>Bạn có chắc chắn muốn Reset toàn bộ tiến trình?</p><ul class="sub"><li>Toàn bộ XP sẽ bị xóa.</li><li>Tất cả nhiệm vụ đã hoàn thành sẽ được đặt lại.</li><li>Các Security Key đã thu thập sẽ bị xóa.</li><li>Level 4 sẽ bị khóa lại.</li><li>Timer và số lần dùng Hint trở về ban đầu.</li></ul><button class="g" id="rmc">CANCEL</button> <button class="w" id="rmo">CONFIRM RESET</button></div>';
+document.body.appendChild(o);const close=()=>{o.remove();document.removeEventListener('keydown',esc)};const esc=e=>{if(e.key==='Escape')close()};document.addEventListener('keydown',esc);
+$('#rmc').onclick=close;$('#rmo').onclick=()=>{close();doReset(false)};$('#rmc').focus()}
+/* ---------- SESSION CONTENT BANK (dữ liệu hóa) ---------- */
+/* Tiến trình tích lũy (XP, key, unlock) nằm trong KEY; nội dung phiên (tình huống + seed) nằm trong SKEY; lịch sử chu kỳ nằm trong CKEY. */
+const SKEY='cyb4_session_v1',CKEY='cyb4_cycle_v1';
+const SCN=[
+{id:'phish',title:'Email lừa đảo',m1:'VERIFY THE SOURCE',w2:'PHISH',m3:'REPORT SUSPICIOUS EMAILS',a:'mail_admin',d:'Hồ sơ nhân sự',
+ sit:'Hộp thư của Trung tâm điều hành nhận hàng loạt email giả danh bộ phận IT, yêu cầu nhân viên "xác nhận tài khoản" ngay.',
+ intro:'Một email lừa đảo đã lọt qua và gây ra nhiều sự cố cùng lúc.',c1:'Bấm vào email giả mạo bộ phận IT',c3:'Dùng thông tin đăng nhập bị lộ qua email giả',
+ bad:['Mở thử tệp đính kèm trong email lạ để kiểm tra','Mở tệp lạ có thể cài mã độc; hãy báo cáo và để bộ phận an ninh phân tích.'],
+ lesson:'luôn kiểm chứng nguồn gửi và báo cáo email đáng ngờ thay vì bấm hay mở tệp.'},
+{id:'pass',title:'Bảo vệ tài khoản cá nhân',m1:'USE STRONG PASSWORDS',w2:'LOGIN',m3:'ENABLE TWO FACTOR',a:'admin_ops',d:'Dữ liệu khách hàng',
+ sit:'Hệ thống ghi nhận nhiều tài khoản dùng mật khẩu yếu và bị thử đăng nhập liên tục.',
+ intro:'Mật khẩu yếu đã bị dò ra và kéo theo nhiều sự cố.',c1:'Mật khẩu yếu bị dò liên tục',c3:'Đăng nhập bằng mật khẩu bị đoán ra',
+ bad:['Đặt lại mọi mật khẩu thành 123456 cho dễ nhớ','Mật khẩu đơn giản rất dễ bị đoán, làm tăng nguy cơ bị chiếm tài khoản.'],
+ lesson:'dùng mật khẩu mạnh, không trùng lặp và bật xác thực hai lớp.'},
+{id:'link',title:'Liên kết độc hại',m1:'AVOID UNKNOWN LINKS',w2:'CLICK',m3:'CHECK BEFORE YOU CLICK',a:'staff_21',d:'Tài liệu nội bộ',
+ sit:'Một liên kết rút gọn lạ được chia sẻ trong kênh nội bộ và dẫn tới trang đăng nhập giả.',
+ intro:'Một liên kết độc hại đã được bấm và gây ra nhiều sự cố.',c1:'Bấm vào liên kết rút gọn không rõ nguồn',c3:'Máy trạm tải tệp từ trang web giả mạo',
+ bad:['Bấm thử liên kết để xem trang web trông thế nào','Bấm liên kết lạ có thể đưa bạn tới trang giả mạo hoặc tải mã độc; hãy kiểm tra địa chỉ và báo cáo.'],
+ lesson:'không bấm liên kết lạ; kiểm tra địa chỉ trước khi truy cập.'},
+{id:'backup',title:'Bảo vệ dữ liệu quan trọng',m1:'BACKUP YOUR DATA',w2:'RESTORE',m3:'TEST YOUR BACKUPS',a:'backup_svc',d:'Dữ liệu tài chính',
+ sit:'Một ổ đĩa chứa dữ liệu quan trọng sắp hỏng, trong khi lịch sao lưu đã bị bỏ dở nhiều tuần.',
+ intro:'Ổ đĩa hỏng và lịch sao lưu bị bỏ dở gây ra nhiều sự cố.',c1:'Tài khoản dịch vụ sao lưu dùng trên thiết bị lạ',c3:'Tiến trình lạ truy cập kho sao lưu',
+ bad:['Chỉ giữ một bản sao duy nhất trên cùng ổ đĩa','Bản sao nằm cùng thiết bị sẽ mất cùng lúc khi ổ đĩa hỏng; cần nhiều bản ở nơi khác nhau.'],
+ lesson:'sao lưu đều đặn, lưu ở nơi khác và thử khôi phục định kỳ.'},
+{id:'patch',title:'Cập nhật phần mềm',m1:'UPDATE YOUR SOFTWARE',w2:'PATCH',m3:'INSTALL SECURITY UPDATES',a:'sysadmin_03',d:'Nhật ký giao dịch',
+ sit:'Một máy chủ chưa cập nhật bản vá bảo mật đang bị quét lỗ hổng từ bên ngoài.',
+ intro:'Lỗ hổng chưa vá đã bị khai thác và gây ra nhiều sự cố.',c1:'Khai thác lỗ hổng trên phần mềm chưa vá',c3:'Quét lỗ hổng từ địa chỉ lạ',
+ bad:['Hoãn cập nhật vì sợ gián đoạn công việc','Chậm vá lỗi cho phép kẻ tấn công khai thác lỗ hổng đã biết; nên lên lịch cập nhật có kiểm soát.'],
+ lesson:'cập nhật bản vá bảo mật kịp thời để đóng các lỗ hổng đã biết.'},
+{id:'otp',title:'Mạo danh quản trị viên',m1:'NEVER SHARE YOUR OTP',w2:'SCAM',m3:'VERIFY BEFORE YOU TRUST',a:'finance_05',d:'Sổ cái kế toán',
+ sit:'Một người tự xưng là quản trị viên gọi điện, yêu cầu nhân viên đọc mã OTP để "khắc phục sự cố".',
+ intro:'Mã OTP bị lừa lấy và gây ra nhiều sự cố cùng lúc.',c1:'Mã OTP bị đọc cho người lạ qua điện thoại',c3:'Đăng nhập bằng mã OTP bị lừa lấy',
+ bad:['Đọc mã OTP cho người xưng là quản trị viên','Không bao giờ chia sẻ OTP; quản trị viên thật không yêu cầu mã này.'],
+ lesson:'không chia sẻ OTP và xác minh người liên hệ qua kênh chính thức.'}];
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuf(a,r){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function ld(k,f){try{const v=JSON.parse(localStorage.getItem(k));return v==null?f:v}catch(e){return f}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+let SESS=null;
+function newSession(){let used=ld(CKEY,[]);if(!Array.isArray(used))used=[];const prev=SESS&&SESS.id;let pool=SCN.filter(s=>!used.includes(s.id));
+ if(!pool.length){used=[];pool=SCN.filter(s=>s.id!=prev)}
+ const s=pool[Math.floor(Math.random()*pool.length)];used.push(s.id);sv(CKEY,used);SESS={id:s.id,seed:1+Math.floor(Math.random()*1e9)};sv(SKEY,SESS);buildSession(SESS)}
+function initSession(){const s=ld(SKEY,null);if(s&&typeof s.seed=='number'&&SCN.some(x=>x.id==s.id)){SESS=s;buildSession(s)}else newSession()}
+function buildSession(se){const sc=SCN.find(x=>x.id==se.id),r=rng(se.seed);SC=sc;
+const sh=1+Math.floor(r()*25),bits=w=>w.split('').map(ch=>ch.charCodeAt(0).toString(2).padStart(8,'0')).join(' '),c0=sc.w2.charCodeAt(0),b0=bits(sc.w2).split(' ');let e2;do{e2=shuf(b0,r).join(' ')}while(e2===b0.join(' ')&&b0.length>1);
+CH=[{id:'c1',name:'CAESAR CIPHER',xp:300,enc:caesar(sc.m1,-sh),ans:sc.m1,hint:'Bảng chữ cái đã bị dịch chuyển một số vị trí bất kỳ. Hãy thử lần lượt từng độ dịch từ 1 đến 25 và xem phần giải mã có chứa thành từ tiếng Anh có nghĩa không.',
+ edu:'Caesar Cipher là phương pháp mã hóa thay thế: mỗi chữ cái được dịch chuyển một số vị trí cố định trong bảng chữ cái (ở đây Shift = '+sh+'). Đây chỉ là phương pháp học tập, KHÔNG đủ an toàn để bảo vệ dữ liệu hiện đại vì chỉ có 25 khóa để thử.'},
+{id:'c2',name:'THÔNG ĐIỆP NHỊ PHÂN',xp:300,enc:e2,ans:sc.w2,hint:'Máy tính biểu diễn ký tự bằng mã nhị phân. Mỗi nhóm 8 bit là một số 0–255 (mã ASCII); ví dụ 01000001 = 65 = "A".',
+ edu:'Máy tính biểu diễn dữ liệu bằng hai trạng thái 0 và 1 (bit). 8 bit tạo thành 1 byte, có thể là một số từ 0–255; theo bảng ASCII, số đó tương ứng một ký tự ('+c0+' = '+sc.w2[0]+'). Binary/ASCII là cách biểu diễn dữ liệu, không phải phương pháp bảo mật.'},
+{id:'c3',name:'GIẢI MÃ CUỐI CÙNG',xp:400,enc:caesar(sc.m3,-sh),ans:sc.m3,hint:'Đôi khi độ dịch đơn giản nhất lại là chìa khóa. Bạn đã gặp một Shift rất quen ở Challenge 1.',
+ edu:'Mã hóa giúp bảo vệ tính bảo mật của thông tin bằng cách chuyển dữ liệu thành dạng khó đọc nếu không có phương pháp hoặc khóa giải mã phù hợp. Thực tế hiện nay dùng các thuật toán mạnh như AES, không dùng Caesar.'}];
+const A=sc.a,D=sc.d,T=[
+{id:'i1',name:'TÀI KHOẢN BỊ XÂM NHẬP',alert:'CẢNH BÁO: PHÁT HIỆN ĐĂNG NHẬP BẤT THƯỜNG\n\nTài khoản: '+A+'\nThiết bị: Thiết bị lạ\nVị trí: Không xác định\nNghi vấn: '+sc.c1+'\nTrạng thái: Có thể đã bị chiếm quyền',done:'TÀI KHOẢN ĐÃ AN TOÀN',
+ hint:'Hãy chọn cách vừa chặn truy cập đáng ngờ, vừa xác minh người dùng thật, không làm lộ thông tin.',
+ right:['Tạm thời khóa tài khoản '+A+', sau đó xác minh danh tính qua một kênh độc lập đáng tin cậy.','Khóa tạm thời ngăn truy cập trái phép ngay lập tức; xác minh qua kênh độc lập (ví dụ gọi điện số đã đăng ký) đảm bảo đúng người dùng thật.'],
+ wrong:[['Khoanh vùng cảnh báo như một báo nhiễu quen thuộc, chưa cần khóa tài khoản '+A+' ngay lúc này.','Bỏ qua cảnh báo cho phép kẻ tấn công tiếp tục truy cập. Mọi dấu hiệu bất thường cần được xử lý.'],['Gửi cho quản trị viên toàn bộ mật khẩu hiện tại của tài khoản '+A+' qua tin nhắn nội bộ để được xử lý gấp.','Không bao giờ chia sẻ mật khẩu qua tin nhắn: kênh này có thể bị đọc lén, và quản trị viên hợp lệ không cần mật khẩu của bạn.'],['Xóa nhanh dữ liệu và lịch sử phiên của tài khoản '+A+' trên máy chủ để ngăn truy cập ngay.','Xóa dữ liệu gây mất mát không cần thiết và làm mất bằng chứng điều tra.']],fx:{h:10,s:25,n:20}},
+{id:'i2',name:'MẤT DỮ LIỆU',alert:'CẢNH BÁO: DỮ LIỆU KHÔNG CÒN TOÀN VẸN\n\nCơ sở dữ liệu chính ('+D+'): Bị hỏng\nBản sao lưu (Backup) tin cậy: Sẵn sàng\nBản sao lưu không rõ nguồn gốc: Đã phát hiện',done:'ĐÃ KHÔI PHỤC DỮ LIỆU',
+ hint:'Nguồn dữ liệu khôi phục phải đáng tin cậy và được kiểm tra sau khi khôi phục.',
+ right:['Khôi phục '+D+' từ bản backup đáng tin cậy đã được xác minh và kiểm tra tính toàn vẹn dữ liệu.','Backup đáng tin cậy giúp phục hồi dữ liệu; kiểm tra toàn vẹn (ví dụ so sánh mã băm) xác nhận dữ liệu không bị sai lệch.'],
+ wrong:[['Khôi phục '+D+' càng nhanh càng tốt từ bản sao lưu chưa rõ nguồn gốc lấy từ máy cá nhân của một nhân viên.','Backup không rõ nguồn gốc có thể bị giả mạo hoặc chứa mã độc, làm hệ thống mất an toàn hơn.'],['Để dứt điểm lỗi: xóa toàn bộ hệ thống cùng các dịch vụ đang chạy, dựng lại từ đầu cho chắc.','Xóa toàn bộ hệ thống làm mất luôn dữ liệu còn lại và gây gián đoạn nghiêm trọng.'],['Giữ '+D+' vận hành bình thường để người dùng không bị gián đoạn, dữ liệu hỏng xử lý dần sau.','Tiếp tục với dữ liệu hỏng làm sai kết quả và lỗi lan rộng.']],fx:{h:10,i:35,n:15}},
+{id:'i3',name:'XÂM NHẬP TRÁI PHÉP',alert:'CẢNH BÁO: TRUY CẬP TRÁI PHÉP\n\nThành phần bị ảnh hưởng: NODE-04\nTruy cập trái phép: Đã phát hiện\nNghi vấn: '+sc.c3+'\nNhật ký hệ thống (Log): Còn nguyên vẹn',done:'ĐÃ NGĂN CHẶN XÂM NHẬP',
+ hint:'Ứng phó sự cố tốt cần bảo toàn bằng chứng và báo cho người có trách nhiệm.',
+ right:['Ghi nhận cảnh báo, cô lập thành phần bị ảnh hưởng khi cần thiết, bảo toàn log và thông báo cho người có trách nhiệm.','Cô lập có kiểm soát hạn chế lan rộng, log giúp đánh giá phạm vi, báo cáo đúng người để xử lý theo quy trình.'],
+ wrong:[['Xóa toàn bộ nhật ký hệ thống để tránh lộ thông tin và giảm nguy cơ bị khai thác sâu hơn.','Log là bằng chứng để biết điều gì đã xảy ra. Xóa log che giấu dấu vết và cản trở điều tra.'],['Ngắt điện toàn bộ hệ thống ngay lập tức, kể cả các dịch vụ trọng yếu khác, để chắc chắn chặn đứt mọi kết nối vừa phát hiện ra.','Tắt tất cả khi chưa đánh giá gây gián đoạn lớn và có thể mất dữ liệu trong bộ nhớ.'],['Hệ thống vẫn chạy bình thường và chưa có thiệt hại rõ ràng, đang trong phiên người dùng cao điểm nên khoan can thiệp.','Hệ thống vẫn chạy không có nghĩa là an toàn; kẻ tấn công có thể đang hoạt động âm thầm.']],fx:{h:15,s:25,n:35}}];
+INC=T.map(t=>{const o=shuf([t.right.concat(1)].concat(t.wrong.map(w=>w.concat(0))),r);return{id:t.id,name:t.name,alert:t.alert,done:t.done,hint:t.hint,fx:t.fx,ok:o.findIndex(x=>x[2]),opts:o.map(x=>x[0]),why:o.map(x=>x[1])}});
+const gen=[['Chia sẻ mật khẩu quản trị cho cả nhóm cho nhanh','Làm tăng nguy cơ lộ thông tin đăng nhập.'],['Xóa log cũ cho hệ thống nhẹ hơn để đỡ tốn bộ nhớ.','Mất bằng chứng điều tra sự cố.']][Math.floor(r()*2)];
+FD={id:'fd',hint:'Cần đủ 4 biện pháp: tài khoản, khôi phục từ backup tin cậy, kiểm tra toàn vẹn, giám sát + lưu log. Tránh các biện pháp rủi ro.',
+ opts:shuf([['Bảo vệ tài khoản và xác thực người dùng',1,'Identity Core: ngăn kẻ tấn công quay lại bằng tài khoản bị chiếm.',0],['Khôi phục dữ liệu từ bản backup đáng tin cậy',1,'Backup System: đưa dữ liệu về trạng thái sạch, đã biết.',1],['Kiểm tra tính toàn vẹn của dữ liệu sau khôi phục',1,'Encryption Core: xác nhận dữ liệu không bị thay đổi trái phép.',2],['Tiếp tục giám sát hệ thống và lưu trữ nhật ký sự cố',1,'Firewall: phát hiện sớm tái diễn và giữ bằng chứng.',3],[gen[0],0,gen[1],-1],[sc.bad[0],0,sc.bad[1],-1]],r)}}
+
+/* Smooth progress bars across re-renders: animate from the previous value to the real new one (transform only). */
+const BW={};let BS='';
+new MutationObserver(()=>{if(BS!==curScr){for(const k in BW)delete BW[k];BS=curScr}
+const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+app.querySelectorAll('.bar i').forEach((el,k)=>{const w=parseFloat(el.style.width)||0,o=BW[k];BW[k]=w;
+if(rm||o==null||o===w||w===0)return;el.style.transition='none';el.style.transform='scaleX('+(o/w)+')';void el.offsetWidth;el.style.transition='';el.style.transform=''})}).observe(app,{childList:true,subtree:true});
+initSession();
+go('menu');
+</script><script src="/shared/cv-nav.js" defer></script>
+</body></html>
